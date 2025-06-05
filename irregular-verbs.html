@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr" class="transition-colors duration-300">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verbes Irréguliers - Anglix</title>
+  <meta name="description" content="Site de Valentin Stark ou Stark Valentin jeux de verbe irrégulier pour apprendre facilement le verbe irrégulier gratuitement et sans pub" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          animation: {
+            'fade-up': 'fadeUp 0.6s ease-out forwards',
+          },
+          keyframes: {
+            fadeUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+    /* Style slider personnalisé */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 9999px;
+      background: #a5b4fc; /* Indigo-300 */
+      outline: none;
+      transition: background 0.3s;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      background: #4f46e5; /* Indigo-600 */
+      cursor: pointer;
+      border-radius: 9999px;
+      box-shadow: 0 0 2px rgba(0,0,0,0.3);
+      transition: background 0.3s;
+      margin-top: -9px;
+    }
+    input[type="range"]:hover::-webkit-slider-thumb {
+      background: #4338ca; /* Indigo-700 */
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      background: #4f46e5;
+      cursor: pointer;
+      border-radius: 9999px;
+      box-shadow: 0 0 2px rgba(0,0,0,0.3);
+      transition: background 0.3s;
+    }
+    input[type="range"]:hover::-moz-range-thumb {
+      background: #4338ca;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-white dark:from-gray-900 dark:to-black min-h-screen flex items-center justify-center p-4 transition-colors duration-300 text-gray-800 dark:text-gray-200">
+<button
+  id="back-button"
+  onclick="window.location.href='anglix.html'"
+  class="absolute top-4 left-4 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-600 font-semibold transition"
+  aria-label="Retour"
+>
+  ← Retour
+</button>
+
+
+  <!-- Container général -->
+  <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-lg w-full p-8 animate-fade-up">
+    
+    <!-- Ecran sélection mode -->
+    <div id="mode-select-screen" class="screen active space-y-6">
+      <h2 class="text-3xl font-bold text-center">Sélectionnez les modes de jeu</h2>
+      
+      <div class="flex justify-center gap-4">
+        <button id="mode-translation" class="mode-button bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full font-semibold transition">Traduction</button>
+        <button id="mode-base" class="mode-button bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full font-semibold transition">Base verbale</button>
+        <button id="mode-past" class="mode-button bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full font-semibold transition">Participe passé</button>
+      </div>
+
+      <div class="text-center">
+        <h2 class="text-2xl font-semibold mb-2">Sélectionnez le nombre de questions</h2>
+        <input type="range" id="question-count" min="5" max="30" value="10" class="slider mb-2" />
+        <div class="text-xl font-semibold" id="question-count-display">10</div>
+        <div>Questions</div>
+      </div>
+
+      <div class="text-center mt-6">
+        <button id="play-button" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-full font-bold transition text-xl">Jouer</button>
+      </div>
+    </div>
+
+    <!-- Autres écrans cachés par défaut -->
+    <div id="game-container" class="screen hidden space-y-4">
+      <h2 id="question" class="text-2xl font-semibold"></h2>
+      <div id="answer-buttons" class="flex flex-wrap gap-4 justify-center"></div>
+      <p id="lives" class="text-lg font-medium">Vies restantes : <span id="lives-count"></span></p>
+      <div id="progress-bar" class="w-full h-3 rounded-full bg-gray-300 dark:bg-gray-700 overflow-hidden">
+        <div class="h-full bg-indigo-600 dark:bg-indigo-400 transition-all duration-300" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <div id="game-over-screen" class="screen hidden text-center space-y-4">
+      <h2 id="game-over-message" class="text-3xl font-bold"></h2>
+      <button id="restart-button" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full font-semibold transition">Recommencer</button>
+    </div>
+
+    <div id="death-screen" class="screen hidden text-center space-y-4">
+      <h2 class="text-3xl font-bold">Tu as perdu 😢</h2>
+      <p>Ne t'inquiète pas, tu peux réessayer et t'améliorer !</p>
+      <button id="death-restart-button" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full font-semibold transition">Recommencer</button>
+    </div>
+
+    <div id="victory-screen" class="screen hidden text-center space-y-4">
+      <h2 class="text-3xl font-bold">Bravo 🎉</h2>
+      <p id="victory-message" class="text-lg font-medium"></p>
+      <button id="victory-restart-button" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-semibold transition">Recommencer</button>
+    </div>
+
+  </div>
+
+  <!-- Bouton thème sombre -->
+  <button
+    id="theme-toggle"
+    class="fixed bottom-4 left-4 bg-gray-200 dark:bg-gray-700 text-xl p-2 rounded-full shadow-md transition duration-300 hover:scale-110"
+    title="Changer de thème"
+  >
+    🌙
+  </button>
+
+  <script>
+    // Gestion thème clair/sombre
+    const themeToggle = document.getElementById('theme-toggle');
+    const html = document.documentElement;
+
+    if (localStorage.getItem('theme') === 'dark') {
+      html.classList.add('dark');
+      themeToggle.textContent = '☀️';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      const isDark = html.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      themeToggle.textContent = isDark ? '☀️' : '🌙';
+    });
+
+    // Affichage dynamique du nombre de questions
+    const questionCountSlider = document.getElementById('question-count');
+    const questionCountDisplay = document.getElementById('question-count-display');
+    questionCountSlider.addEventListener('input', () => {
+      questionCountDisplay.textContent = questionCountSlider.value;
+    });
+  </script>
+
+  <script src="rrrr.js"></script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Site de Valentin Stark ou Stark Valentin" />
+  <title>Valentin Stark - Bienvenue !</title>
+  <img src="logon.png" alt="Logo de mon site" width="150" />
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Roboto:wght@400;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #ff6ec4, #7873f5);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 3.5rem;
+      margin-bottom: 15px;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+      animation: popIn 1s ease forwards;
+    }
+
+    p.lead {
+      font-size: 1.5rem;
+      margin-bottom: 40px;
+      font-weight: 700;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .btn {
+      background: #ffd93b;
+      color: #333;
+      padding: 15px 35px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 6px #c1a800;
+      transition: all 0.3s ease;
+      display: inline-block;
+      user-select: none;
+    }
+
+    .btn:hover {
+      background: #fff;
+      box-shadow: 0 4px #c1a800;
+      transform: translateY(-3px);
+    }
+
+    .confetti {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.3); opacity: 0;}
+      100% { transform: scale(1); opacity: 1;}
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Bienvenue sur le site de Valentin Stark ! 🎉</h1>
+  <p class="lead">Ici, c'est fun, coloré et plein de surprises !</p>
+  <a href="accueil.html" class="btn">C'est parti 🚀</a>
+
+  <canvas class="confetti"></canvas>
+
+  <script>
+    // Confetti simple JS
+    const canvas = document.querySelector('.confetti');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let confettiParticles = [];
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    class Confetti {
+      constructor() {
+        this.x = random(0, width);
+        this.y = random(-height, 0);
+        this.size = random(5, 12);
+        this.speedY = random(2, 5);
+        this.speedX = random(-1.5, 1.5);
+        this.color = `hsl(${random(0, 360)}, 100%, 60%)`;
+        this.opacity = random(0.7, 1);
+        this.tilt = random(-15, 15);
+        this.tiltSpeed = random(0.1, 0.3);
+        this.tiltAngle = 0;
+      }
+      update() {
+        this.y += this.speedY;
+        this.x += this.speedX;
+        this.tiltAngle += this.tiltSpeed;
+        this.tilt = Math.sin(this.tiltAngle) * 15;
+        if (this.y > height) {
+          this.y = random(-20, -10);
+          this.x = random(0, width);
+        }
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.lineWidth = this.size / 2;
+        ctx.strokeStyle = this.color;
+        ctx.moveTo(this.x + this.tilt + this.size / 2, this.y);
+        ctx.lineTo(this.x + this.tilt, this.y + this.tilt + this.size / 2);
+        ctx.stroke();
+      }
+    }
+
+    for (let i = 0; i < 150; i++) {
+      confettiParticles.push(new Confetti());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      confettiParticles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+
+</body>
+</html>
