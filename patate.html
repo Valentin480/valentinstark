@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr" class="transition-colors duration-300">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Anglix - Accueil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+      };
+    </script>
+  </head>
+  <body class="bg-gradient-to-br from-blue-100 to-white dark:from-gray-900 dark:to-black min-h-screen flex items-center justify-center relative text-gray-800 dark:text-gray-200 transition-all duration-300">
+   <div id="level-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden animate-fade-in">
+  <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-2xl w-80 text-center">
+    <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Ton niveau scolaire</h2>
+    <select id="level-select" class="w-full p-3 rounded-xl mb-4 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      <option value="" disabled selected hidden>Choisis ton niveau</option>
+      <option value="6e">6e</option>
+      <option value="5e">5e</option>
+      <option value="4e">4e</option>
+      <option value="3e">3e</option>
+      <option value="2nde">2nde</option>
+    </select>
+    <button id="save-level" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-full transition">Valider</button>
+  </div>
+</div>
+
+</div><!-- Contenu principal -->
+    <div class="text-center p-8 rounded-2xl shadow-2xl bg-white dark:bg-gray-800 max-w-md mx-auto animate-fade-in">
+      <img src="logo.png" alt="Logo Anglix" class="w-48 mx-auto mb-4 animate-fade-down" />
+      <h1 class="text-3xl font-extrabold mb-2 animate-fade-up">Maîtrise l’anglais en t’amusant</h1>
+      <p class="text-gray-600 dark:text-gray-300 mb-6 animate-fade-up delay-100">Bienvenue sur <strong>Anglix</strong>, ton nouveau superpouvoir 💥</p>
+      <button
+        id="start-learning-button"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-full transition duration-300 animate-fade-up delay-200"
+      >
+        Je veux apprendre
+      </button>
+    </div>
+
+    <!-- Bouton thème sombre -->
+    <button
+      id="theme-toggle"
+      class="absolute bottom-4 left-4 bg-gray-200 dark:bg-gray-700 text-xl p-2 rounded-full shadow-md transition duration-300 hover:scale-110"
+      title="Changer de thème"
+    >
+      🌙
+    </button>
+
+    <!-- JS -->
+    <script>
+      // Redirection
+      document.getElementById('start-learning-button').addEventListener('click', () => {
+        window.location.href = 'subject.html';
+      });
+
+      // Thème sombre avec stockage localStorage
+      const toggleBtn = document.getElementById('theme-toggle');
+      const html = document.documentElement;
+
+      // Applique le thème sauvegardé au chargement
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        html.classList.add('dark');
+      } else if (savedTheme === 'light') {
+        html.classList.remove('dark');
+      } else {
+        // Si pas de préférence, on peut détecter la préférence système
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          html.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+        }
+      }
+
+      // Met à jour l’icône du bouton selon le thème actuel
+      function updateIcon() {
+        toggleBtn.textContent = html.classList.contains('dark') ? '☀️' : '🌙';
+      }
+
+      toggleBtn.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        if (html.classList.contains('dark')) {
+          localStorage.setItem('theme', 'dark');
+        } else {
+          localStorage.setItem('theme', 'light');
+        }
+        updateIcon();
+      });
+
+      updateIcon();
+    const levelModal = document.getElementById('level-modal');
+const levelSelect = document.getElementById('level-select');
+const saveLevel = document.getElementById('save-level');
+
+// Afficher la modale uniquement si aucun niveau n'est encore enregistré
+if (!localStorage.getItem('niveau_scolaire')) {
+  levelModal.classList.remove('hidden');
+}
+
+saveLevel.addEventListener('click', () => {
+  const selected = levelSelect.value;
+  if (selected) {
+    localStorage.setItem('niveau_scolaire', selected);
+    levelModal.classList.add('hidden');
+  } else {
+    alert('Merci de choisir ton niveau scolaire.');
+  }
+});
+    </script>
+    
+
+
+    <!-- Animations -->
+    <style>
+      @keyframes fade-in {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      @keyframes fade-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes fade-down {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .animate-fade-in {
+        animation: fade-in 0.6s ease-out forwards;
+      }
+
+      .animate-fade-up {
+        animation: fade-up 0.6s ease-out forwards;
+      }
+
+      .animate-fade-down {
+        animation: fade-down 0.6s ease-out forwards;
+      }
+
+      .delay-100 { animation-delay: 0.1s; }
+      .delay-200 { animation-delay: 0.2s; }
+      v@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+select {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='%23999' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+}
+
+    </style>
+  </body>
+</html>
