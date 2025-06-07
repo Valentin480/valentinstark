@@ -88,6 +88,7 @@
   <canvas class="confetti"></canvas>
 
   <script>
+    
     // Confetti simple JS
     const canvas = document.querySelector('.confetti');
     const ctx = canvas.getContext('2d');
@@ -155,6 +156,15 @@
     }
     animate();
   </script>
+  <script>
+  // Vérifie si l'utilisateur est sur mobile
+     if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    // Vérifie s’il n’est pas déjà sur la page d’avertissement
+     if (!window.location.href.includes("mobile-warning.html")) {
+      window.location.href = "/mobile-warning.html";
+    }
+  }
+    </script>
 
 </body>
 </html>

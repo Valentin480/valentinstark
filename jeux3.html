@@ -63,9 +63,131 @@
   <div id="game-area">
     <div id="target"></div>
     <div id="countdown"></div>
+    
+    <div id="topBar" style="
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(255,255,255,0.9);
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      color: #3498db;
+      font-size: 18px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      font-weight: bold;
+      z-index: 100;
+      user-select: none;
+      cursor: default;
+    ">
+      <div id="pseudoZone" style="cursor:pointer;">👤 Pseudo : <span id="pseudo">...</span></div>
+      <div id="xpZone" style="cursor:default;">⭐ XP : <span id="xp">0</span></div>
+    </div>
+  </div>
+
+  <!-- Modal pour pseudo (optionnel, si tu veux le support) -->
+  <div id="pseudoModal" style="display:none; position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:1000;">
+    <div style="background:white;padding:30px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.2);text-align:center;max-width:90%;box-sizing:border-box;">
+      <h2>Entrez votre pseudo</h2>
+      <input type="text" id="pseudoInput" placeholder="Ton pseudo ici" autofocus style="padding:10px;font-size:18px;border-radius:8px;border:1px solid #ccc;margin-top:10px;width:100%;max-width:250px;box-sizing:border-box;" />
+      <br />
+      <button id="validatePseudoBtn" style="margin-top:15px;padding:10px 20px;font-size:16px;background:#3498db;color:white;border:none;border-radius:8px;cursor:pointer;">Valider</button>
+    </div>
+  </div>
   </div>
 
   <script>
+    // --- Pseudo & XP system ---
+    let pseudo = localStorage.getItem("pseudo") || null;
+    const pseudoModal = document.getElementById("pseudoModal");
+    const pseudoSpan = document.getElementById("pseudo");
+    const pseudoInput = document.getElementById("pseudoInput");
+    const validatePseudoBtn = document.getElementById("validatePseudoBtn");
+    const xpSpan = document.getElementById("xp");
+    const gameName = "Touche le carré !";
+
+    function checkPseudo() {
+      if (!pseudo) {
+        pseudoModal.style.display = "flex";
+      } else {
+        pseudoSpan.textContent = pseudo;
+      }
+    }
+    checkPseudo();
+
+    validatePseudoBtn.onclick = () => {
+      const val = pseudoInput.value.trim();
+      if(val.length < 1) {
+        alert("Merci d'entrer un pseudo valide !");
+        return;
+      }
+      pseudo = val;
+      localStorage.setItem("pseudo", pseudo);
+      pseudoSpan.textContent = pseudo;
+      pseudoModal.style.display = "none";
+    };
+
+    function updateXPDisplay(xp) {
+      xpSpan.textContent = xp;
+      xpSpan.classList.add("xp-anim");
+      setTimeout(() => {
+        xpSpan.classList.remove("xp-anim");
+      }, 1000);
+    }
+
+    function getXP() {
+      return parseInt(localStorage.getItem("xp") || "0");
+    }
+    function getGameXP() {
+      return JSON.parse(localStorage.getItem("gameXP") || "{}");
+    }
+    function addXP(amount, type = "normal") {
+      let totalXP = getXP() + amount;
+      localStorage.setItem("xp", totalXP);
+      updateXPDisplay(totalXP);
+
+      let gameXP = getGameXP();
+      if(!gameXP[gameName]) gameXP[gameName] = 0;
+      gameXP[gameName] += amount;
+      localStorage.setItem("gameXP", JSON.stringify(gameXP));
+
+      // Ajout à l'historique
+      let history = JSON.parse(localStorage.getItem("xpHistory") || "[]");
+      history.push({
+        date: new Date().toISOString(),
+        game: type === "bonus" ? "Bonus " + gameName : gameName,
+        xp: amount
+      });
+      localStorage.setItem("xpHistory", JSON.stringify(history));
+    }
+
+    // Initialisation XP affichage
+    updateXPDisplay(getXP());
+
+    // Changer pseudo en cliquant dessus
+    document.getElementById("pseudoZone").addEventListener("click", () => {
+      pseudoModal.style.display = "flex";
+      pseudoInput.value = pseudo;
+      pseudoInput.focus();
+    });
+
+    // Animation XP style
+    const style = document.createElement("style");
+    style.textContent = `
+      .xp-anim {
+        animation: xpGain 1s ease-out;
+      }
+      @keyframes xpGain {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.5); color: limegreen; }
+        100% { transform: scale(1); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // --- Jeu "Touche le carré !" ---
     const gameArea = document.getElementById('game-area');
     const target = document.getElementById('target');
     const scoreDisplay = document.getElementById('score');
@@ -76,7 +198,6 @@
     const gameTime = 1000; // temps max pour cliquer en ms
     let gameStarted = false;
 
-    // Positionne le carré à une position aléatoire
     function moveTarget() {
       const maxX = gameArea.clientWidth - target.clientWidth;
       const maxY = gameArea.clientHeight - target.clientHeight;
@@ -84,25 +205,27 @@
       const y = Math.floor(Math.random() * maxY);
       target.style.left = x + 'px';
       target.style.top = y + 'px';
-
-      // change la couleur aléatoirement à chaque déplacement
       target.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
-
-      // si tu ne cliques pas à temps, game over
       timeoutId = setTimeout(gameOver, gameTime);
     }
 
-    // quand on clique sur le carré
     target.addEventListener('click', () => {
       if (!gameStarted) return;
       clearTimeout(timeoutId);
       score++;
       scoreDisplay.textContent = `Score : ${score}`;
+      addXP(15); // 15 XP à chaque clic
       moveTarget();
     });
 
     function gameOver() {
+      gameStarted = false;
+      clearTimeout(timeoutId);
       alert(`Temps écoulé ! Ton score final est : ${score}`);
+      if (score > 0) {
+        addXP(score * 10, "bonus"); // XP bonus à la fin
+        alert(`Bonus : ${score * 10} XP ajoutés !`);
+      }
       score = 0;
       scoreDisplay.textContent = `Score : 0`;
       startCountdown();
@@ -133,7 +256,7 @@
       }, 1000);
     }
 
-    // démarrer le décompte au chargement
+    // Démarrer le jeu au chargement
     startCountdown();
   </script>
 </body>

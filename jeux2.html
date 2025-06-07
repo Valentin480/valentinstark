@@ -89,7 +89,32 @@
   <div id="pseudoZone" style="cursor:pointer;">👤 Pseudo : <span id="pseudo">...</span></div>
   <div id="xpZone" style="cursor:default;">⭐ XP : <span id="xp">0</span></div>
 </div>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-white dark:from-gray-900 dark:to-black min-h-screen flex items-center justify-center relative text-gray-800 dark:text-gray-200 transition-all duration-300">
+<button
+  id="back-button"
+  onclick="window.location.href='fun.html'"
+  class="absolute top-4 left-4 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-600 font-semibold transition"
+  aria-label="Retour"
+>
+  ← Retour
+</button>
+  </div>
 
+  <!-- Modal pour pseudo (optionnel, si tu veux le support) -->
+  <div id="pseudoModal" style="display:none; position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:1000;">
+    <div style="background:white;padding:30px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.2);text-align:center;max-width:90%;box-sizing:border-box;">
+      <h2>Entrez votre pseudo</h2>
+      <input type="text" id="pseudoInput" placeholder="Ton pseudo ici" autofocus style="padding:10px;font-size:18px;border-radius:8px;border:1px solid #ccc;margin-top:10px;width:100%;max-width:250px;box-sizing:border-box;" />
+      <br />
+      <button id="validatePseudoBtn" style="margin-top:15px;padding:10px 20px;font-size:16px;background:#3498db;color:white;border:none;border-radius:8px;cursor:pointer;">Valider</button>
+    </div>
   </div>
 
   <script>
@@ -190,13 +215,108 @@
       clearInterval(bombInterval);
       clearInterval(moveInterval);
       clearInterval(scoreInterval);
-      alert(`Game Over ! Tu as survécu ${score} secondes.`);
+      // XP = 10 par seconde survécue
+      if(score > 0) {
+        addXP(score * 10, "bonus");
+        alert(`Game Over ! Tu as survécu ${score} secondes.\nTu gagnes ${score*10} XP !`);
+      } else {
+        alert(`Game Over ! Tu as survécu ${score} secondes.`);
+      }
       location.reload();
     }
 
     window.addEventListener('keydown', handleKey);
 
     startGame();
+
+    // XP & Pseudo system
+    let pseudo = localStorage.getItem("pseudo") || null;
+    const pseudoModal = document.getElementById("pseudoModal");
+    const pseudoSpan = document.getElementById("pseudo");
+    const pseudoInput = document.getElementById("pseudoInput");
+    const validatePseudoBtn = document.getElementById("validatePseudoBtn");
+    const xpSpan = document.getElementById("xp");
+    const gameName = "Évite les bombes !";
+
+    function checkPseudo() {
+      if (!pseudo) {
+        pseudoModal.style.display = "flex";
+      } else {
+        pseudoSpan.textContent = pseudo;
+      }
+    }
+    checkPseudo();
+
+    validatePseudoBtn.onclick = () => {
+      const val = pseudoInput.value.trim();
+      if(val.length < 1) {
+        alert("Merci d'entrer un pseudo valide !");
+        return;
+      }
+      pseudo = val;
+      localStorage.setItem("pseudo", pseudo);
+      pseudoSpan.textContent = pseudo;
+      pseudoModal.style.display = "none";
+    };
+
+    // XP animation
+    function updateXPDisplay(xp) {
+      xpSpan.textContent = xp;
+      xpSpan.classList.add("xp-anim");
+      setTimeout(() => {
+        xpSpan.classList.remove("xp-anim");
+      }, 1000);
+    }
+
+    function getXP() {
+      return parseInt(localStorage.getItem("xp") || "0");
+    }
+    function getGameXP() {
+      return JSON.parse(localStorage.getItem("gameXP") || "{}");
+    }
+    function addXP(amount, type = "normal") {
+      let totalXP = getXP() + amount;
+      localStorage.setItem("xp", totalXP);
+      updateXPDisplay(totalXP);
+
+      let gameXP = getGameXP();
+      if(!gameXP[gameName]) gameXP[gameName] = 0;
+      gameXP[gameName] += amount;
+      localStorage.setItem("gameXP", JSON.stringify(gameXP));
+
+      // Ajout à l'historique
+      let history = JSON.parse(localStorage.getItem("xpHistory") || "[]");
+      history.push({
+        date: new Date().toISOString(),
+        game: type === "bonus" ? "Bonus " + gameName : gameName,
+        xp: amount
+      });
+      localStorage.setItem("xpHistory", JSON.stringify(history));
+    }
+
+    // Initialisation XP affichage
+    updateXPDisplay(getXP());
+
+    // Changer pseudo en cliquant dessus
+    document.getElementById("pseudoZone").addEventListener("click", () => {
+      pseudoModal.style.display = "flex";
+      pseudoInput.value = pseudo;
+      pseudoInput.focus();
+    });
+
+    // Animation XP style
+    const style = document.createElement("style");
+    style.textContent = `
+      .xp-anim {
+        animation: xpGain 1s ease-out;
+      }
+      @keyframes xpGain {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.5); color: limegreen; }
+        100% { transform: scale(1); }
+      }
+    `;
+    document.head.appendChild(style);
   </script>
 </body>
 </html>

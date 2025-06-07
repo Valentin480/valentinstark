@@ -88,10 +88,32 @@
   <div id="game-area">
     <div id="ball"></div>
     <div id="game-over">Game Over<br>Ton score : <span id="final-score">0</span></div>
+    <div id="topBar" style="
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(255,255,255,0.9);
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      color: #3498db;
+      font-size: 18px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      font-weight: bold;
+      z-index: 100;
+      user-select: none;
+      cursor: default;
+    ">
+      <div id="pseudoZone" style="cursor:pointer;">👤 Pseudo : <span id="pseudo">...</span></div>
+      <div id="xpZone" style="cursor:default;">⭐ XP : <span id="xp">0</span></div>
+    </div>
   </div>
   <button id="restart-btn">Rejouer</button>
 
   <script>
+    
     const ball = document.getElementById('ball');
     const scoreDisplay = document.getElementById('score');
     const livesDisplay = document.getElementById('lives');
@@ -173,6 +195,49 @@
     }
 
     restartBtn.addEventListener('click', resetGame);
+    
+// Variables de pseudo et XP
+const pseudoSpan = document.getElementById("pseudo");
+const xpSpan = document.getElementById("xp");
+let xp = 0;
+
+// Charger pseudo et XP depuis localStorage
+function loadPlayerData() {
+  const storedPseudo = localStorage.getItem("pseudo") || "Anonyme";
+  const storedXP = parseInt(localStorage.getItem("xp")) || 0;
+  pseudoSpan.textContent = storedPseudo;
+  xp = storedXP;
+  xpSpan.textContent = xp;
+}
+
+// Sauvegarder XP dans localStorage
+function saveXP() {
+  localStorage.setItem("xp", xp);
+}
+
+// Gagner XP (et mettre à jour l'affichage + stockage)
+function addXP(amount) {
+  xp += amount;
+  xpSpan.textContent = xp;
+  saveXP();
+}
+
+// Gagner 200 XP après 60 secondes
+setTimeout(() => {
+  if (lives > 0) {
+    addXP(200);
+    alert("🎉 Bonus : Tu as gagné 200 XP pour avoir tenu 1 minute !");
+  }
+}, 60000);
+
+// Ajouter 50 XP à chaque clic sur la boule
+ball.addEventListener('click', () => {
+  if (lives <= 0) return;
+  addXP(50);
+});
+
+// Charger les données du joueur
+loadPlayerData();
 
     // démarre le jeu au chargement
     resetGame();

@@ -138,7 +138,27 @@
     <p>Clique sur l'étoile dorée pour gagner un point.<br>Évite les étoiles grises qui te feront perdre une vie.<br>Tu as 5 vies et 60 secondes.<br>Prêt ?</p>
     <button id="start-btn">OK</button>
   </div>
-
+<div id="topBar" style="
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(255,255,255,0.9);
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      color: #3498db;
+      font-size: 18px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      font-weight: bold;
+      z-index: 100;
+      user-select: none;
+      cursor: default;
+    ">
+      <div id="pseudoZone" style="cursor:pointer;">👤 Pseudo : <span id="pseudo">...</span></div>
+      <div id="xpZone" style="cursor:default;">⭐ XP : <span id="xp">0</span></div>
+    </div>
   <div id="game-over">
     Temps écoulé !<br>Ton score : <span id="final-score">0</span>
     <br>
@@ -297,6 +317,43 @@
     gameOverEl.style.display = 'none';
     restartBtn.style.display = 'none';
   });
+// Variables de pseudo et XP
+const pseudoSpan = document.getElementById("pseudo");
+const xpSpan = document.getElementById("xp");
+let xp = 0;
+
+// Charger pseudo et XP depuis localStorage
+function loadPlayerData() {
+  const storedPseudo = localStorage.getItem("pseudo") || "Anonyme";
+  const storedXP = parseInt(localStorage.getItem("xp")) || 0;
+  pseudoSpan.textContent = storedPseudo;
+  xp = storedXP;
+  xpSpan.textContent = xp;
+}
+
+// Sauvegarder XP dans localStorage
+function saveXP() {
+  localStorage.setItem("xp", xp);
+}
+
+// Gagner XP (et mettre à jour l'affichage + stockage)
+function addXP(amount) {
+  xp += amount;
+  xpSpan.textContent = xp;
+  saveXP();
+}
+
+// Gagner 200 XP après 60 secondes
+setTimeout(() => {
+  if (lives > 0) {
+    addXP(200);
+    alert("🎉 Bonus : Tu as gagné 200 XP pour avoir joué 1 minute !");
+  }
+}, 60000);
+
+
+// Charger les données du joueur
+loadPlayerData();
 
   startBtn.addEventListener('click', startGame);
 </script>
