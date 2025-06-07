@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Évite les Carrés Rouges</title>
+<style>
+  body {
+    margin: 0;
+    background: linear-gradient(to right, #1e3c72, #2a5298);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    user-select: none;
+    color: white;
+  }
+  h1 {
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px #000;
+  }
+  #game-area {
+    position: relative;
+    width: 600px;
+    height: 400px;
+    background: #0b1e40;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 0 20px #0008 inset;
+  }
+  #player {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #3af;
+    border-radius: 8px;
+    top: 180px;
+    left: 280px;
+    pointer-events: none;
+  }
+  .enemy {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #f33;
+    border-radius: 8px;
+  }
+  #score, #timer {
+    font-size: 1.5em;
+    margin: 5px 15px;
+    font-weight: bold;
+    text-shadow: 0 0 5px #0008;
+  }
+  #countdown {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 100px;
+    font-weight: bold;
+    color: #3af;
+    text-shadow: 0 0 30px #3af;
+    user-select: none;
+    display: none;
+  }
+  #start-screen {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #000000cc;
+    border-radius: 20px;
+    padding: 30px 40px;
+    text-align: center;
+    box-shadow: 0 0 30px #3affaaaa;
+    color: #3af;
+    width: 350px;
+  }
+  #start-btn {
+    margin-top: 20px;
+    font-size: 20px;
+    padding: 12px 45px;
+    border: none;
+    border-radius: 25px;
+    background-color: #3af;
+    color: #0b1e40;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 20px #3af;
+    transition: background-color 0.3s ease;
+  }
+  #start-btn:hover {
+    background-color: #2377dd;
+  }
+  #game-over {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #3afcc99;
+    color: #0b1e40;
+    padding: 30px 45px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 36px;
+    text-align: center;
+    display: none;
+    box-shadow: 0 0 30px #3afcc99;
+  }
+  #restart-btn {
+    margin-top: 20px;
+    font-size: 20px;
+    padding: 12px 40px;
+    border-radius: 25px;
+    border: none;
+    background-color: #0b1e40;
+    color: #3af;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 0 20px #0b1e40;
+    display: none;
+  }
+  #restart-btn:hover {
+    background-color: #06152c;
+  }
+</style>
+</head>
+<body>
+
+<h1>Évite les Carrés Rouges !</h1>
+<div>
+  <span id="score">Score : 0</span>
+  <span id="timer">Temps : 60</span>
+</div>
+
+<div id="game-area">
+  <div id="countdown">3</div>
+
+  <div id="start-screen">
+    <p>Déplace ta souris pour bouger le carré bleu.<br>
+    Évite les carrés rouges qui tombent.<br>
+    Le jeu dure 60 secondes.<br>
+    Prêt ?</p>
+    <button id="start-btn">OK</button>
+  </div>
+
+  <div id="player"></div>
+
+  <div id="game-over">
+    Temps écoulé !<br>Ton score : <span id="final-score">0</span>
+    <br>
+    <button id="restart-btn">Rejouer</button>
+  </div>
+</div>
+
+<script>
+  const gameArea = document.getElementById('game-area');
+  const player = document.getElementById('player');
+  const scoreDisplay = document.getElementById('score');
+  const timerDisplay = document.getElementById('timer');
+  const countdownEl = document.getElementById('countdown');
+  const startScreen = document.getElementById('start-screen');
+  const startBtn = document.getElementById('start-btn');
+  const gameOverEl = document.getElementById('game-over');
+  const finalScoreEl = document.getElementById('final-score');
+  const restartBtn = document.getElementById('restart-btn');
+
+  let score = 0;
+  let timeLeft = 60;
+  let countdownInterval, gameInterval, enemyInterval;
+  let enemies = [];
+  let gameRunning = false;
+
+  // Gère le déplacement du joueur avec la souris
+  gameArea.addEventListener('mousemove', e => {
+    if(!gameRunning) return;
+    const rect = gameArea.getBoundingClientRect();
+    let x = e.clientX - rect.left - player.offsetWidth / 2;
+    let y = e.clientY - rect.top - player.offsetHeight / 2;
+    // Limites du jeu
+    x = Math.max(0, Math.min(x, gameArea.clientWidth - player.offsetWidth));
+    y = Math.max(0, Math.min(y, gameArea.clientHeight - player.offsetHeight));
+    player.style.left = x + 'px';
+    player.style.top = y + 'px';
+  });
+
+  function createEnemy() {
+    const enemy = document.createElement('div');
+    enemy.classList.add('enemy');
+    const x = Math.random() * (gameArea.clientWidth - 40);
+    enemy.style.left = x + 'px';
+    enemy.style.top = '-40px'; // Commence au dessus du cadre
+    gameArea.appendChild(enemy);
+    enemies.push(enemy);
+  }
+
+  function moveEnemies() {
+    enemies.forEach((enemy, index) => {
+      const speed = 2 + score * 0.1; // accélère avec score
+      let top = parseFloat(enemy.style.top);
+      top += speed;
+      enemy.style.top = top + 'px';
+
+      if(top > gameArea.clientHeight) {
+        enemy.remove();
+        enemies.splice(index, 1);
+        score++;
+        scoreDisplay.textContent = `Score : ${score}`;
+      } else if(collide(enemy, player)) {
+        endGame();
+      }
+    });
+  }
+
+  function collide(a, b) {
+    const aRect = a.getBoundingClientRect();
+    const bRect = b.getBoundingClientRect();
+    return !(
+      aRect.right < bRect.left ||
+      aRect.left > bRect.right ||
+      aRect.bottom < bRect.top ||
+      aRect.top > bRect.bottom
+    );
+  }
+
+  function startGame() {
+    score = 0;
+    timeLeft = 60;
+    scoreDisplay.textContent = `Score : ${score}`;
+    timerDisplay.textContent = `Temps : ${timeLeft}`;
+    gameOverEl.style.display = 'none';
+    restartBtn.style.display = 'none';
+    startScreen.style.display = 'none';
+    countdownEl.style.display = 'block';
+
+    let countdown = 3;
+    countdownEl.textContent = countdown;
+    countdownInterval = setInterval(() => {
+      countdown--;
+      if(countdown === 0) {
+        clearInterval(countdownInterval);
+        countdownEl.style.display = 'none';
+
+        gameRunning = true;
+
+        gameInterval = setInterval(() => {
+          timeLeft--;
+          timerDisplay.textContent = `Temps : ${timeLeft}`;
+          if(timeLeft <= 0) endGame();
+        }, 1000);
+
+        enemyInterval = setInterval(() => {
+          createEnemy();
+        }, 900);
+
+        // Boucle pour déplacer ennemis
+        function gameLoop() {
+          if(!gameRunning) return;
+          moveEnemies();
+          requestAnimationFrame(gameLoop);
+        }
+        requestAnimationFrame(gameLoop);
+
+      } else {
+        countdownEl.textContent = countdown;
+      }
+    }, 1000);
+  }
+
+  function endGame() {
+    gameRunning = false;
+    clearInterval(gameInterval);
+    clearInterval(countdownInterval);
+    clearInterval(enemyInterval);
+
+    enemies.forEach(e => e.remove());
+    enemies = [];
+
+    gameOverEl.style.display = 'block';
+    finalScoreEl.textContent = score;
+    restartBtn.style.display = 'inline-block';
+  }
+
+  restartBtn.addEventListener('click', () => {
+    startScreen.style.display = 'block';
+    gameOverEl.style.display = 'none';
+    restartBtn.style.display = 'none';
+  });
+
+  startBtn.addEventListener('click', startGame);
+</script>
+
+</body>
+</html>

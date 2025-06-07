@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Touche le carré !</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+      font-family: 'Arial', sans-serif;
+      margin: 0; padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      position: relative;
+    }
+    h1 {
+      margin-bottom: 15px;
+      color: #333;
+      text-shadow: 1px 1px 2px white;
+    }
+    #score {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      color: #222;
+    }
+    #game-area {
+      width: 400px;
+      height: 400px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 0 15px #fda085aa;
+      position: relative;
+      overflow: hidden;
+    }
+    #target {
+      width: 60px;
+      height: 60px;
+      background-color: #ff6347;
+      position: absolute;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      display: none;
+    }
+    #countdown {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 100px;
+      font-weight: bold;
+      color: #ff6347;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Touche le carré !</h1>
+  <div id="score">Score : 0</div>
+  <div id="game-area">
+    <div id="target"></div>
+    <div id="countdown"></div>
+  </div>
+
+  <script>
+    const gameArea = document.getElementById('game-area');
+    const target = document.getElementById('target');
+    const scoreDisplay = document.getElementById('score');
+    const countdown = document.getElementById('countdown');
+
+    let score = 0;
+    let timeoutId;
+    const gameTime = 1000; // temps max pour cliquer en ms
+    let gameStarted = false;
+
+    // Positionne le carré à une position aléatoire
+    function moveTarget() {
+      const maxX = gameArea.clientWidth - target.clientWidth;
+      const maxY = gameArea.clientHeight - target.clientHeight;
+      const x = Math.floor(Math.random() * maxX);
+      const y = Math.floor(Math.random() * maxY);
+      target.style.left = x + 'px';
+      target.style.top = y + 'px';
+
+      // change la couleur aléatoirement à chaque déplacement
+      target.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+
+      // si tu ne cliques pas à temps, game over
+      timeoutId = setTimeout(gameOver, gameTime);
+    }
+
+    // quand on clique sur le carré
+    target.addEventListener('click', () => {
+      if (!gameStarted) return;
+      clearTimeout(timeoutId);
+      score++;
+      scoreDisplay.textContent = `Score : ${score}`;
+      moveTarget();
+    });
+
+    function gameOver() {
+      alert(`Temps écoulé ! Ton score final est : ${score}`);
+      score = 0;
+      scoreDisplay.textContent = `Score : 0`;
+      startCountdown();
+    }
+
+    function startGame() {
+      gameStarted = true;
+      target.style.display = 'block';
+      countdown.style.display = 'none';
+      moveTarget();
+    }
+
+    function startCountdown() {
+      let count = 3;
+      countdown.style.display = 'block';
+      countdown.textContent = count;
+      target.style.display = 'none';
+      gameStarted = false;
+
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count === 0) {
+          clearInterval(countdownInterval);
+          startGame();
+        } else {
+          countdown.textContent = count;
+        }
+      }, 1000);
+    }
+
+    // démarrer le décompte au chargement
+    startCountdown();
+  </script>
+</body>
+</html>

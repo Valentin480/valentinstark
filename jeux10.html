@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Couleur Ciblée</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #fafafa;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    #game {
+      margin-top: 20px;
+    }
+    #targetColor {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    .color-btn {
+      display: inline-block;
+      width: 100px;
+      height: 100px;
+      margin: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .color-btn:hover {
+      transform: scale(1.1);
+    }
+    #score, #time, #lives {
+      font-size: 18px;
+      margin: 10px;
+    }
+    #startBtn {
+      padding: 10px 20px;
+      font-size: 20px;
+      background-color: limegreen;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #message {
+      font-size: 22px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🎯 Tire sur la bonne couleur !</h1>
+
+<div id="game">
+  <div id="targetColor">Clique sur : <b>rouge</b></div>
+  <div id="buttons">
+    <!-- les boutons vont être générés dynamiquement -->
+  </div>
+  <div id="score">Score : 0</div>
+  <div id="lives">❤️ Vies : 3</div>
+  <div id="time">⏱️ Temps : 60</div>
+  <button id="startBtn">Commencer</button>
+  <div id="message"></div>
+</div>
+
+<script>
+  const colors = ["rouge", "bleu", "vert", "jaune", "violet", "orange"];
+  const colorHex = {
+    rouge: "#e74c3c",
+    bleu: "#3498db",
+    vert: "#2ecc71",
+    jaune: "#f1c40f",
+    violet: "#9b59b6",
+    orange: "#e67e22"
+  };
+
+  let score = 0;
+  let lives = 3;
+  let timeLeft = 60;
+  let target = "rouge";
+  let interval;
+  const targetDisplay = document.getElementById("targetColor");
+  const scoreDisplay = document.getElementById("score");
+  const livesDisplay = document.getElementById("lives");
+  const timeDisplay = document.getElementById("time");
+  const message = document.getElementById("message");
+  const startBtn = document.getElementById("startBtn");
+
+  function startGame() {
+    score = 0;
+    lives = 3;
+    timeLeft = 60;
+    updateDisplays();
+    message.textContent = "";
+    startBtn.style.display = "none";
+    createButtons();
+    newTarget();
+    interval = setInterval(() => {
+      timeLeft--;
+      updateDisplays();
+      if (timeLeft <= 0 || lives <= 0) {
+        endGame();
+      }
+    }, 1000);
+  }
+
+  function endGame() {
+    clearInterval(interval);
+    message.textContent = (lives <= 0) ? "Perdu 😵" : `Bravo 🎉 Score : ${score}`;
+    startBtn.textContent = "Rejouer";
+    startBtn.style.display = "inline-block";
+  }
+
+  function updateDisplays() {
+    scoreDisplay.textContent = "Score : " + score;
+    livesDisplay.textContent = "❤️ Vies : " + lives;
+    timeDisplay.textContent = "⏱️ Temps : " + timeLeft;
+  }
+
+  function createButtons() {
+    const container = document.getElementById("buttons");
+    container.innerHTML = "";
+    let shuffled = [...colors].sort(() => 0.5 - Math.random());
+    for (let c of shuffled) {
+      const btn = document.createElement("div");
+      btn.className = "color-btn";
+      btn.style.backgroundColor = colorHex[c];
+      btn.onclick = () => checkAnswer(c);
+      container.appendChild(btn);
+    }
+  }
+
+  function newTarget() {
+    target = colors[Math.floor(Math.random() * colors.length)];
+    targetDisplay.innerHTML = `Clique sur : <b>${target}</b>`;
+  }
+
+  function checkAnswer(clickedColor) {
+    if (clickedColor === target) {
+      score++;
+      createButtons();
+      newTarget();
+    } else {
+      lives--;
+    }
+    updateDisplays();
+    if (lives <= 0) {
+      endGame();
+    }
+  }
+
+  startBtn.onclick = startGame;
+</script>
+
+</body>
+</html>

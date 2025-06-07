@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Ton Score</title>
+  <style>
+    body {
+      background-color: #fdf6e3;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #333;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1.8em;
+    }
+
+    a {
+      margin-top: 30px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Temps écoulé ⏰</h1>
+  <p id="final-score">Tu as marqué : 0 points</p>
+  <a href="fun.html">Un autre jeux</a>
+  <a href="jeux.html">Rejouer</a>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const score = params.get("score") || 0;
+    document.getElementById("final-score").textContent = `Tu as marqué : ${score} point${score == 1 ? "" : "s"}`;
+  </script>
+</body>
+</html>

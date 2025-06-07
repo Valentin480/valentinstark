@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Attrape-moi si tu peux !</title>
+  <style>
+    body {
+      background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+      font-family: 'Comic Sans MS', cursive;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    #score, #timer {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+    }
+
+    #game-area {
+      position: relative;
+      width: 90vw;
+      height: 70vh;
+      border: 3px dashed #fff;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    #target {
+      position: absolute;
+      padding: 15px 25px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: transform 0.1s ease;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Attrape-moi si tu peux !</h1>
+  <div id="timer">Temps restant : 60s</div>
+  <div id="score">Score : 0</div>
+  <div id="game-area">
+    <button id="target">Clique-moi !</button>
+  </div>
+
+  <script>
+    const target = document.getElementById('target');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const gameArea = document.getElementById('game-area');
+    let score = 0;
+    let speed = 1000;
+    let timeLeft = 60; // secondes
+
+    function randomPosition() {
+      const maxX = gameArea.clientWidth - target.offsetWidth;
+      const maxY = gameArea.clientHeight - target.offsetHeight;
+      const randomX = Math.random() * maxX;
+      const randomY = Math.random() * maxY;
+      target.style.left = `${randomX}px`;
+      target.style.top = `${randomY}px`;
+    }
+
+    function updateSpeed() {
+      speed = Math.max(300, speed - 30);
+    }
+
+    function moveTarget() {
+      randomPosition();
+      setTimeout(moveTarget, speed);
+    }
+
+    target.addEventListener('click', () => {
+      score++;
+      scoreDisplay.textContent = `Score : ${score}`;
+      updateSpeed();
+    });
+
+    // Timer
+    const timerInterval = setInterval(() => {
+      timeLeft--;
+      timerDisplay.textContent = `Temps restant : ${timeLeft}s`;
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        window.location.href = `result.html?score=${score}`;
+      }
+    }, 1000);
+
+    // Démarrage
+    randomPosition();
+    setTimeout(moveTarget, speed);
+  </script>
+</body>
+</html>

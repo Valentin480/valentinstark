@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Tap the Color!</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #f0f8ff, #add8e6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    user-select: none;
+  }
+  h1 {
+    margin-bottom: 10px;
+    color: #333;
+  }
+  #score, #lives, #timer {
+    font-size: 1.3em;
+    margin: 5px 15px;
+    color: #222;
+  }
+  #game-area {
+    position: relative;
+    width: 700px;
+    height: 500px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 0 15px #7777aaaa;
+    overflow: hidden;
+    margin-top: 15px;
+  }
+  .circle {
+    position: absolute;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  .circle:active {
+    transform: scale(1.3);
+  }
+  #countdown {
+    font-size: 80px;
+    color: #444;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    user-select: none;
+  }
+  #game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    font-weight: bold;
+    color: #aa2222;
+    background: #fff8;
+    padding: 20px 40px;
+    border-radius: 15px;
+    display: none;
+    text-align: center;
+  }
+  #restart-btn {
+    margin-top: 15px;
+    padding: 10px 30px;
+    font-size: 20px;
+    border: none;
+    border-radius: 12px;
+    background-color: #d33;
+    color: white;
+    cursor: pointer;
+    display: none;
+  }
+  #restart-btn:hover {
+    background-color: #a00;
+  }
+  #start-screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90%;
+    max-width: 500px;
+    padding: 30px 20px;
+    background: #f0f8ffcc;
+    border-radius: 20px;
+    box-shadow: 0 0 15px #3333;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    user-select: none;
+  }
+  #start-screen p {
+    font-size: 24px;
+    margin-bottom: 25px;
+    color: #222;
+  }
+  #start-btn {
+    font-size: 24px;
+    padding: 15px 50px;
+    border-radius: 25px;
+    border: none;
+    background-color: #4285f4;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 5px 15px #4285f480;
+    transition: background-color 0.3s ease;
+  }
+  #start-btn:hover {
+    background-color: #3367d6;
+  }
+</style>
+</head>
+<body>
+
+<h1>Tap the Color !</h1>
+<div>
+  <span id="score">Score : 0</span>
+  <span id="lives">Vies : 5</span>
+  <span id="timer">Temps : 60</span>
+</div>
+
+<div id="game-area">
+  <div id="countdown" style="display:none;">3</div>
+  <div id="game-over">Temps écoulé !<br>Ton score : <span id="final-score">0</span></div>
+  <div id="start-screen">
+    <p>Clique sur les cercles <strong>rouges</strong> pour gagner des points.<br>Clique sur une autre couleur, tu perds une vie.<br>Tu as 5 vies et 60 secondes.<br>Prêt ?</p>
+    <button id="start-btn">OK</button>
+  </div>
+</div>
+<button id="restart-btn">Rejouer</button>
+
+<script>
+  const gameArea = document.getElementById('game-area');
+  const scoreDisplay = document.getElementById('score');
+  const livesDisplay = document.getElementById('lives');
+  const timerDisplay = document.getElementById('timer');
+  const countdownEl = document.getElementById('countdown');
+  const gameOverEl = document.getElementById('game-over');
+  const finalScoreEl = document.getElementById('final-score');
+  const restartBtn = document.getElementById('restart-btn');
+  const startScreen = document.getElementById('start-screen');
+  const startBtn = document.getElementById('start-btn');
+
+  let score = 0;
+  let lives = 5;
+  let timeLeft = 60;
+  let gameInterval;
+  let countdownInterval;
+  let circleSpawnerInterval;
+
+  const colors = ['red', 'blue', 'green', 'orange', 'purple', 'yellow'];
+
+  function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function createCircle() {
+    if (lives <= 0 || timeLeft <= 0) return;
+
+    const circle = document.createElement('div');
+    const size = randomInt(40, 80);
+    circle.classList.add('circle');
+    circle.style.width = size + 'px';
+    circle.style.height = size + 'px';
+
+    const color = colors[randomInt(0, colors.length - 1)];
+    circle.style.backgroundColor = color;
+
+    const maxX = gameArea.clientWidth - size;
+    const maxY = gameArea.clientHeight - size;
+    circle.style.left = randomInt(0, maxX) + 'px';
+    circle.style.top = randomInt(0, maxY) + 'px';
+
+    circle.addEventListener('click', () => {
+      if (lives <= 0 || timeLeft <= 0) return;
+
+      if (color === 'red') {
+        score++;
+        scoreDisplay.textContent = `Score : ${score}`;
+      } else {
+        lives--;
+        livesDisplay.textContent = `Vies : ${lives}`;
+        if (lives <= 0) {
+          endGame();
+          return;
+        }
+      }
+      circle.remove();
+    });
+
+    gameArea.appendChild(circle);
+
+    setTimeout(() => {
+      if (circle.parentNode) circle.remove();
+    }, 2000);
+  }
+
+  function gameLoop() {
+    if (lives <= 0 || timeLeft <= 0) {
+      endGame();
+      return;
+    }
+    createCircle();
+  }
+
+  function startGame() {
+    score = 0;
+    lives = 5;
+    timeLeft = 60;
+    scoreDisplay.textContent = `Score : ${score}`;
+    livesDisplay.textContent = `Vies : ${lives}`;
+    timerDisplay.textContent = `Temps : ${timeLeft}`;
+    gameOverEl.style.display = 'none';
+    restartBtn.style.display = 'none';
+    countdownEl.style.display = 'block';
+    startScreen.style.display = 'none';
+
+    let countdown = 3;
+    countdownEl.textContent = countdown;
+    countdownInterval = setInterval(() => {
+      countdown--;
+      if (countdown === 0) {
+        clearInterval(countdownInterval);
+        countdownEl.style.display = 'none';
+
+        gameInterval = setInterval(() => {
+          timeLeft--;
+          timerDisplay.textContent = `Temps : ${timeLeft}`;
+          if (timeLeft <= 0) {
+            endGame();
+          }
+        }, 1000);
+
+        circleSpawnerInterval = setInterval(gameLoop, 700);
+      } else {
+        countdownEl.textContent = countdown;
+      }
+    }, 1000);
+  }
+
+  function endGame() {
+    clearInterval(gameInterval);
+    clearInterval(countdownInterval);
+    clearInterval(circleSpawnerInterval);
+    document.querySelectorAll('.circle').forEach(c => c.remove());
+    gameOverEl.style.display = 'block';
+    finalScoreEl.textContent = score;
+    restartBtn.style.display = 'inline-block';
+  }
+
+  restartBtn.addEventListener('click', () => {
+    startScreen.style.display = 'block';
+    gameOverEl.style.display = 'none';
+    restartBtn.style.display = 'none';
+  });
+
+  startBtn.addEventListener('click', startGame);
+
+</script>
+
+</body>
+</html>
+ 

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Évite les bombes !</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(45deg, #7f7fd5, #86a8e7, #91eae4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Arial', sans-serif;
+      user-select: none;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin: 15px 0 5px 0;
+      color: #222;
+      text-shadow: 1px 1px 2px white;
+    }
+
+    #score {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+      color: #222;
+    }
+
+    #gameArea {
+      position: relative;
+      width: 400px;
+      height: 500px;
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 0 10px #3335;
+      overflow: hidden;
+      border: 3px solid #555;
+    }
+
+    #player {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background-color: #4caf50;
+      border-radius: 50%;
+      bottom: 20px;
+      left: 180px;
+      transition: left 0.1s;
+      box-shadow: 0 0 10px #4caf5080;
+    }
+
+    .bomb {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background-color: #f44336;
+      border-radius: 50%;
+      top: -30px;
+      box-shadow: 0 0 10px #f4433680;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Évite les bombes !</h1>
+  <div id="score">Temps survécu : 0s</div>
+  <div id="gameArea">
+    <div id="player"></div>
+  </div>
+
+  <script>
+    const gameArea = document.getElementById('gameArea');
+    const player = document.getElementById('player');
+    const scoreDisplay = document.getElementById('score');
+
+    let playerPosX = 180;
+    const playerSpeed = 20;
+    const gameWidth = gameArea.clientWidth;
+    const playerWidth = player.clientWidth;
+
+    let bombs = [];
+    let bombSpeed = 3;
+    let bombInterval;
+    let moveInterval;
+    let gameOver = false;
+    let score = 0;
+    let scoreInterval;
+
+    // Crée une bombe à position aléatoire en haut
+    function createBomb() {
+      if(gameOver) return;
+      const bomb = document.createElement('div');
+      bomb.classList.add('bomb');
+      bomb.style.left = Math.floor(Math.random() * (gameWidth - 30)) + 'px';
+      bomb.style.top = '-30px';
+      gameArea.appendChild(bomb);
+      bombs.push(bomb);
+    }
+
+    // Déplace les bombes vers le bas
+    function moveBombs() {
+      if(gameOver) return;
+      bombs.forEach((bomb, index) => {
+        let top = parseInt(bomb.style.top);
+        top += bombSpeed;
+        bomb.style.top = top + 'px';
+
+        // Si bombe en bas de la zone, la supprimer
+        if(top > gameArea.clientHeight) {
+          bomb.remove();
+          bombs.splice(index, 1);
+        }
+
+        // Collision avec le joueur ?
+        if(collision(bomb, player)) {
+          endGame();
+        }
+      });
+    }
+
+    // Détecte collision entre 2 éléments
+    function collision(el1, el2) {
+      const r1 = el1.getBoundingClientRect();
+      const r2 = el2.getBoundingClientRect();
+
+      return !(
+        r1.top > r2.bottom ||
+        r1.bottom < r2.top ||
+        r1.right < r2.left ||
+        r1.left > r2.right
+      );
+    }
+
+    // Gère les déplacements du joueur
+    function handleKey(e) {
+      if(gameOver) return;
+      if(e.key === 'ArrowLeft' || e.key === 'a') {
+        playerPosX = Math.max(0, playerPosX - playerSpeed);
+        player.style.left = playerPosX + 'px';
+      }
+      if(e.key === 'ArrowRight' || e.key === 'd') {
+        playerPosX = Math.min(gameWidth - playerWidth, playerPosX + playerSpeed);
+        player.style.left = playerPosX + 'px';
+      }
+    }
+
+    // Démarre le jeu
+    function startGame() {
+      bombInterval = setInterval(createBomb, 1000);
+      moveInterval = setInterval(moveBombs, 20);
+      scoreInterval = setInterval(() => {
+        score++;
+        scoreDisplay.textContent = `Temps survécu : ${score}s`;
+        if(score % 10 === 0 && bombInterval > 300) {
+          bombInterval -= 100; // accélère les bombes toutes les 10s
+          clearInterval(bombInterval);
+          bombInterval = setInterval(createBomb, bombInterval);
+          bombSpeed += 0.5;
+        }
+      }, 1000);
+    }
+
+    // Stoppe le jeu
+    function endGame() {
+      gameOver = true;
+      clearInterval(bombInterval);
+      clearInterval(moveInterval);
+      clearInterval(scoreInterval);
+      alert(`Game Over ! Tu as survécu ${score} secondes.`);
+      location.reload();
+    }
+
+    window.addEventListener('keydown', handleKey);
+
+    startGame();
+  </script>
+</body>
+</html>

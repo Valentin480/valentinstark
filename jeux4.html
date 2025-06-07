@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Attrape la boule !</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+      font-family: 'Arial', sans-serif;
+      margin: 0; padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      overflow: hidden;
+    }
+    h1 {
+      margin-bottom: 15px;
+      color: #222;
+      text-shadow: 1px 1px 2px #fff;
+    }
+    #score, #lives {
+      font-size: 1.3em;
+      margin: 10px;
+      color: #333;
+    }
+    #game-area {
+      width: 700px;
+      height: 500px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 0 15px #a1c4fdaa;
+      position: relative;
+      overflow: hidden;
+    }
+    #ball {
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle at 30% 30%, #ff6f61, #d33);
+      border-radius: 50%;
+      position: absolute;
+      cursor: pointer;
+      user-select: none;
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    #ball:hover {
+      box-shadow: 0 0 15px 5px #ff6f61aa;
+    }
+    #ball:active {
+      transform: scale(1.2);
+      box-shadow: 0 0 25px 10px #ff3b2fcc;
+    }
+    #game-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      color: #d33;
+      font-weight: bold;
+      display: none;
+      text-align: center;
+    }
+    #restart-btn {
+      margin-top: 20px;
+      padding: 10px 25px;
+      font-size: 18px;
+      border: none;
+      background: #ff6f61;
+      color: white;
+      border-radius: 12px;
+      cursor: pointer;
+      display: none;
+    }
+    #restart-btn:hover {
+      background: #d33;
+    }
+  </style>
+</head>
+<body>
+  <h1>Attrape la boule !</h1>
+  <div>
+    <span id="score">Score : 0</span>
+    <span id="lives" style="margin-left:30px;">Vies : 5</span>
+  </div>
+  <div id="game-area">
+    <div id="ball"></div>
+    <div id="game-over">Game Over<br>Ton score : <span id="final-score">0</span></div>
+  </div>
+  <button id="restart-btn">Rejouer</button>
+
+  <script>
+    const ball = document.getElementById('ball');
+    const scoreDisplay = document.getElementById('score');
+    const livesDisplay = document.getElementById('lives');
+    const gameOverText = document.getElementById('game-over');
+    const finalScore = document.getElementById('final-score');
+    const restartBtn = document.getElementById('restart-btn');
+    const gameArea = document.getElementById('game-area');
+
+    let score = 0;
+    let lives = 5;
+    let posX = 0;
+    let posY = 0;
+    let speedX = 2;
+    let speedY = 2;
+    const ballSize = 60;
+    let animationId;
+
+    function resetGame() {
+      score = 0;
+      lives = 5;
+      speedX = 2;
+      speedY = 2;
+      posX = Math.random() * (gameArea.clientWidth - ballSize);
+      posY = Math.random() * (gameArea.clientHeight - ballSize);
+      scoreDisplay.textContent = `Score : ${score}`;
+      livesDisplay.textContent = `Vies : ${lives}`;
+      gameOverText.style.display = 'none';
+      restartBtn.style.display = 'none';
+      ball.style.display = 'block';
+      animate();
+    }
+
+    function animate() {
+      animationId = requestAnimationFrame(animate);
+
+      posX += speedX;
+      posY += speedY;
+
+      // Rebonds sur les bords et perte de vie si touche un bord
+      if (posX <= 0 || posX >= gameArea.clientWidth - ballSize) {
+        speedX = -speedX;
+        loseLife();
+      }
+      if (posY <= 0 || posY >= gameArea.clientHeight - ballSize) {
+        speedY = -speedY;
+        loseLife();
+      }
+
+      ball.style.left = posX + 'px';
+      ball.style.top = posY + 'px';
+    }
+
+    function loseLife() {
+      lives--;
+      livesDisplay.textContent = `Vies : ${lives}`;
+      if (lives <= 0) {
+        endGame();
+      }
+    }
+
+    ball.addEventListener('click', () => {
+      if (lives <= 0) return;
+      score++;
+      scoreDisplay.textContent = `Score : ${score}`;
+      // accélère la boule à chaque clic
+      speedX *= 1.07;
+      speedY *= 1.07;
+      // Change la direction aléatoirement (pour que ce soit fun)
+      speedX = (Math.random() > 0.5 ? 1 : -1) * Math.abs(speedX);
+      speedY = (Math.random() > 0.5 ? 1 : -1) * Math.abs(speedY);
+    });
+
+    function endGame() {
+      cancelAnimationFrame(animationId);
+      ball.style.display = 'none';
+      finalScore.textContent = score;
+      gameOverText.style.display = 'block';
+      restartBtn.style.display = 'inline-block';
+    }
+
+    restartBtn.addEventListener('click', resetGame);
+
+    // démarre le jeu au chargement
+    resetGame();
+  </script>
+</body>
+</html>

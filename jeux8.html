@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Attrape les Bulles !</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at center, #4ecdc4, #556270);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: white;
+      user-select: none;
+    }
+    h1 {
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #000;
+    }
+    #game-area {
+      position: relative;
+      width: 600px;
+      height: 400px;
+      background-color: #002b36;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 0 20px #0009 inset;
+    }
+    #player {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: #fff;
+      border-radius: 50%;
+      border: 3px solid #4ecdc4;
+      pointer-events: none;
+      mix-blend-mode: difference;
+    }
+    .bubble {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #ff6b6b;
+      animation: pop 2s ease-out forwards;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    #score, #timer {
+      font-size: 1.5em;
+      margin: 5px 15px;
+      font-weight: bold;
+      text-shadow: 0 0 5px #0008;
+    }
+    #start-screen {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #000000aa;
+      padding: 30px 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 0 30px #ff6b6b99;
+    }
+    #start-btn, #restart-btn {
+      margin-top: 20px;
+      font-size: 20px;
+      padding: 12px 45px;
+      border: none;
+      border-radius: 25px;
+      background-color: #ff6b6b;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 20px #ff6b6b;
+      transition: background-color 0.3s ease;
+    }
+    #start-btn:hover, #restart-btn:hover {
+      background-color: #dd4444;
+    }
+    #game-over {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #ffffffdd;
+      color: #002b36;
+      padding: 30px 40px;
+      border-radius: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Attrape les Bulles !</h1>
+<div>
+  <span id="score">Score : 0</span>
+  <span id="timer">Temps : 60</span>
+</div>
+
+<div id="game-area">
+  <div id="player"></div>
+  <div id="start-screen">
+    <p>Bouge le cercle avec ta souris<br>et attrape les bulles rouges !<br>Tu as 60 secondes.</p>
+    <button id="start-btn">Jouer</button>
+  </div>
+  <div id="game-over">
+    Temps écoulé !<br>Score final : <span id="final-score">0</span><br>
+    <button id="restart-btn">Rejouer</button>
+  </div>
+</div>
+
+<script>
+  const gameArea = document.getElementById('game-area');
+  const player = document.getElementById('player');
+  const scoreDisplay = document.getElementById('score');
+  const timerDisplay = document.getElementById('timer');
+  const startScreen = document.getElementById('start-screen');
+  const startBtn = document.getElementById('start-btn');
+  const gameOver = document.getElementById('game-over');
+  const finalScore = document.getElementById('final-score');
+  const restartBtn = document.getElementById('restart-btn');
+
+  let score = 0;
+  let timeLeft = 60;
+  let bubbleInterval, timerInterval;
+  let gameRunning = false;
+
+  gameArea.addEventListener('mousemove', (e) => {
+    if (!gameRunning) return;
+    const rect = gameArea.getBoundingClientRect();
+    let x = e.clientX - rect.left - player.offsetWidth / 2;
+    let y = e.clientY - rect.top - player.offsetHeight / 2;
+    player.style.left = Math.max(0, Math.min(x, gameArea.clientWidth - 50)) + 'px';
+    player.style.top = Math.max(0, Math.min(y, gameArea.clientHeight - 50)) + 'px';
+  });
+
+  function spawnBubble() {
+    const bubble = document.createElement('div');
+    bubble.classList.add('bubble');
+    bubble.style.left = Math.random() * (gameArea.clientWidth - 30) + 'px';
+    bubble.style.top = Math.random() * (gameArea.clientHeight - 30) + 'px';
+    gameArea.appendChild(bubble);
+
+    setTimeout(() => {
+      if (gameRunning && bubble.parentElement) {
+        bubble.remove();
+      }
+    }, 2000);
+
+    bubble.addEventListener('mouseenter', () => {
+      if (!gameRunning) return;
+      bubble.remove();
+      score++;
+      scoreDisplay.textContent = `Score : ${score}`;
+    });
+  }
+
+  function startGame() {
+    score = 0;
+    timeLeft = 60;
+    scoreDisplay.textContent = `Score : 0`;
+    timerDisplay.textContent = `Temps : 60`;
+    startScreen.style.display = 'none';
+    gameOver.style.display = 'none';
+    gameRunning = true;
+
+    bubbleInterval = setInterval(spawnBubble, 700);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timerDisplay.textContent = `Temps : ${timeLeft}`;
+      if (timeLeft <= 0) endGame();
+    }, 1000);
+  }
+
+  function endGame() {
+    gameRunning = false;
+    clearInterval(bubbleInterval);
+    clearInterval(timerInterval);
+    document.querySelectorAll('.bubble').forEach(b => b.remove());
+    finalScore.textContent = score;
+    gameOver.style.display = 'block';
+  }
+
+  startBtn.addEventListener('click', startGame);
+  restartBtn.addEventListener('click', () => {
+    startScreen.style.display = 'block';
+    gameOver.style.display = 'none';
+  });
+</script>
+
+</body>
+</html>

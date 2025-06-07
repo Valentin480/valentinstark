@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Parcours Chrono</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #f0f8ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #game {
+      position: relative;
+      width: 600px;
+      height: 400px;
+      background: white;
+      border: 3px solid black;
+      overflow: hidden;
+    }
+    .wall {
+      position: absolute;
+      background: black;
+    }
+    #player {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: limegreen;
+      border-radius: 4px;
+      pointer-events: none;
+      z-index: 2;
+    }
+    #start {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: green;
+      top: 185px;
+      left: 10px;
+      border-radius: 6px;
+      z-index: 1;
+    }
+    #end {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: red;
+      top: 185px;
+      right: 10px;
+      border-radius: 6px;
+      z-index: 1;
+    }
+    #message, #countdown, #instructions, #timer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      z-index: 5;
+    }
+    #countdown {
+      font-size: 60px;
+      padding: 10px;
+    }
+    #timer {
+      top: 10px;
+      left: 10px;
+      transform: none;
+      font-size: 20px;
+      background: none;
+      color: black;
+      z-index: 3;
+    }
+  </style>
+</head>
+<body>
+<div id="game">
+  <div id="start"></div>
+  <div id="end"></div>
+  <div id="player"></div>
+
+  <!-- Murs -->
+  <div class="wall" style="top: 100px; left: 50px; width: 500px; height: 20px;"></div>
+  <div class="wall" style="top: 280px; left: 50px; width: 500px; height: 20px;"></div>
+  <div class="wall" style="top: 120px; left: 530px; width: 20px; height: 160px;"></div>
+  <div class="wall" style="top: 120px; left: 250px; width: 20px; height: 160px;"></div>
+  <div class="wall" style="top: 180px; left: 250px; width: 280px; height: 20px;"></div>
+
+  <!-- UI -->
+  <div id="instructions">
+    Déplace ta souris depuis le point vert 🟩 jusqu’au rouge 🟥 sans toucher les murs.<br>
+    Tu as 30 secondes !<br><br>
+    <button onclick="startCountdown()">OK, je suis prêt !</button>
+  </div>
+  <div id="countdown" style="display:none;">3</div>
+  <div id="message" style="display:none;"></div>
+  <div id="timer">⏱️ 30</div>
+</div>
+
+<script>
+  const game = document.getElementById('game');
+  const player = document.getElementById('player');
+  const start = document.getElementById('start');
+  const end = document.getElementById('end');
+  const walls = document.querySelectorAll('.wall');
+  const instructions = document.getElementById('instructions');
+  const countdown = document.getElementById('countdown');
+  const message = document.getElementById('message');
+  const timerDisplay = document.getElementById('timer');
+
+  let playing = false;
+  let timer;
+  let timeLeft = 30;
+
+  game.addEventListener('mousemove', (e) => {
+    if (!playing) return;
+
+    const rect = game.getBoundingClientRect();
+    const x = e.clientX - rect.left - player.offsetWidth / 2;
+    const y = e.clientY - rect.top - player.offsetHeight / 2;
+
+    player.style.left = x + 'px';
+    player.style.top = y + 'px';
+
+    const playerBox = player.getBoundingClientRect();
+
+    for (let wall of walls) {
+      const wallBox = wall.getBoundingClientRect();
+      if (collision(playerBox, wallBox)) {
+        endGame(false, "Aïe ! Tu as touché un mur.");
+      }
+    }
+
+    const endBox = end.getBoundingClientRect();
+    if (collision(playerBox, endBox)) {
+      endGame(true, "Bravo, tu as gagné 🎉");
+    }
+  });
+
+  function collision(a, b) {
+    return a.left < b.right && a.right > b.left &&
+           a.top < b.bottom && a.bottom > b.top;
+  }
+
+  function startCountdown() {
+    instructions.style.display = 'none';
+    countdown.style.display = 'block';
+    let count = 3;
+    countdown.textContent = count;
+    const interval = setInterval(() => {
+      count--;
+      if (count === 0) {
+        clearInterval(interval);
+        countdown.style.display = 'none';
+        startGame();
+      } else {
+        countdown.textContent = count;
+      }
+    }, 1000);
+  }
+
+  function startGame() {
+    playing = true;
+    player.style.left = '10px';
+    player.style.top = '185px';
+    timeLeft = 30;
+    timerDisplay.textContent = "⏱️ 30";
+    timer = setInterval(() => {
+      timeLeft--;
+      timerDisplay.textContent = "⏱️ " + timeLeft;
+      if (timeLeft <= 0) {
+        endGame(false, "Temps écoulé 😢");
+      }
+    }, 1000);
+  }
+
+  function endGame(win, text) {
+    playing = false;
+    clearInterval(timer);
+    message.textContent = text;
+    message.style.display = 'block';
+  }
+</script>
+</body>
+</html>
