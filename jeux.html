@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Attrape-moi si tu peux !</title>
   <style>
     body {
@@ -14,6 +14,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
 
     h1 {
@@ -22,7 +23,8 @@
       margin-bottom: 10px;
     }
 
-    #score, #timer {
+    #score,
+    #timer {
       font-size: 1.5em;
       margin-bottom: 10px;
     }
@@ -39,7 +41,7 @@
     #target {
       position: absolute;
       padding: 15px 25px;
-      background-color: #4CAF50;
+      background-color: #4caf50;
       color: white;
       border: none;
       border-radius: 12px;
@@ -47,12 +49,36 @@
       font-size: 16px;
       transition: transform 0.1s ease;
       animation: pulse 1s infinite;
+      user-select: none;
     }
 
     @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    /* Nouveau : cadre pseudo + XP en haut à droite */
+    #player-info {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: rgba(255 255 255 / 0.8);
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-family: Arial, sans-serif;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+      color: #333;
+      user-select: none;
+      min-width: 160px;
+      text-align: center;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -64,11 +90,127 @@
     <button id="target">Clique-moi !</button>
   </div>
 
+  <!-- Cadre pseudo + XP -->
+  <!-- Barre fixe en haut à droite -->
+<div id="topBar" style="
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(255,255,255,0.9);
+  padding: 10px 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  color: #3498db;
+  font-size: 18px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  font-weight: bold;
+  z-index: 100;
+  user-select: none;
+  cursor: default;
+">
+  <div id="pseudoZone" style="cursor:pointer;">👤 Pseudo : <span id="pseudo">...</span></div>
+  <div id="xpZone" style="cursor:default;">⭐ XP : <span id="xp">0</span></div>
+</div>
+
+
+</div>
+
+<script>
+  // Récupération pseudo dans localStorage
+  let pseudo = localStorage.getItem("pseudo") || null;
+  const pseudoModal = document.getElementById("pseudoModal");
+  const pseudoSpan = document.getElementById("pseudo");
+  const pseudoInput = document.getElementById("pseudoInput");
+  const validatePseudoBtn = document.getElementById("validatePseudoBtn");
+  const xpSpan = document.getElementById("xp");
+
+  // Fonction d'affichage pseudo ou ouverture modal si absent
+  function checkPseudo() {
+    if (!pseudo) {
+      pseudoModal.style.display = "flex";
+    } else {
+      pseudoSpan.textContent = pseudo;
+    }
+  }
+  checkPseudo();
+
+  validatePseudoBtn.onclick = () => {
+    const val = pseudoInput.value.trim();
+    if(val.length < 1) {
+      alert("Merci d'entrer un pseudo valide !");
+      return;
+    }
+    pseudo = val;
+    localStorage.setItem("pseudo", pseudo);
+    pseudoSpan.textContent = pseudo;
+    pseudoModal.style.display = "none";
+  };
+
+  // Affichage XP avec animation
+  function updateXPDisplay(xp) {
+    xpSpan.textContent = xp;
+    xpSpan.classList.add("xp-anim");
+    setTimeout(() => {
+      xpSpan.classList.remove("xp-anim");
+    }, 1000);
+  }
+
+  // XP par défaut 0 au début
+  updateXPDisplay(parseInt(localStorage.getItem("xp") || "0"));
+
+  // Changer pseudo en cliquant dessus
+  document.getElementById("pseudoZone").addEventListener("click", () => {
+    pseudoModal.style.display = "flex";
+    pseudoInput.value = pseudo;
+    pseudoInput.focus();
+  });
+
+  // Animation XP style (copie de ton jeu)
+  const style = document.createElement("style");
+  style.textContent = `
+    .xp-anim {
+      animation: xpGain 1s ease-out;
+    }
+    @keyframes xpGain {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.5); color: limegreen; }
+      100% { transform: scale(1); }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+
+
   <script>
-    const target = document.getElementById('target');
-    const scoreDisplay = document.getElementById('score');
-    const timerDisplay = document.getElementById('timer');
-    const gameArea = document.getElementById('game-area');
+
+
+    // Gestion XP dans localStorage
+    function getXP() {
+      return parseInt(localStorage.getItem("xp")) || 0;
+    }
+    function setXP(value) {
+      localStorage.setItem("xp", value);
+    }
+    function addXP(amount) {
+      const currentXP = getXP();
+      const newXP = currentXP + amount;
+      setXP(newXP);
+      updateXPDisplay();
+    }
+    function updateXPDisplay() {
+      document.getElementById("xp").textContent = getXP();
+    }
+
+    // Initialisation affichage
+    document.getElementById("pseudo").textContent = pseudo;
+    updateXPDisplay();
+
+    const target = document.getElementById("target");
+    const scoreDisplay = document.getElementById("score");
+    const timerDisplay = document.getElementById("timer");
+    const gameArea = document.getElementById("game-area");
     let score = 0;
     let speed = 1000;
     let timeLeft = 60; // secondes
@@ -91,10 +233,13 @@
       setTimeout(moveTarget, speed);
     }
 
-    target.addEventListener('click', () => {
+    target.addEventListener("click", () => {
       score++;
       scoreDisplay.textContent = `Score : ${score}`;
       updateSpeed();
+
+      // Ajouter 15 XP à chaque clic
+      addXP(15);
     });
 
     // Timer
@@ -104,7 +249,14 @@
 
       if (timeLeft <= 0) {
         clearInterval(timerInterval);
-        window.location.href = `result.html?score=${score}`;
+
+        // Bonus de 150 XP à la fin du jeu
+        addXP(150);
+
+        // Petite pause avant la redirection pour bien afficher l'XP
+        setTimeout(() => {
+          window.location.href = `result.html?score=${score}`;
+        }, 500);
       }
     }, 1000);
 

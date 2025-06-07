@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valentin Games</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+    }
+
+    @keyframes gradientBG {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    .neon-title {
+      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff;
+    }
+
+    .glass {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .neon-button {
+      box-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff;
+    }
+  </style>
+</head>
+<body class="text-white font-sans">
+
+  <!-- Fenêtre modale de pseudo -->
+  <div id="pseudoModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+    <div class="glass p-6 rounded-2xl max-w-md w-full text-center">
+      <h2 class="text-2xl font-bold neon-title mb-4">Bienvenue !</h2>
+      <p class="mb-2">Choisis ton pseudo pour commencer :</p>
+      <input id="pseudoInput" type="text" class="w-full p-2 rounded text-black mb-4" placeholder="Ton pseudo...">
+      <button onclick="savePseudo()" class="neon-button bg-cyan-500 px-4 py-2 rounded-full font-semibold hover:bg-cyan-600">OK</button>
+    </div>
+  </div>
+
+  <!-- Barre pseudo et XP -->
+  <div class="absolute top-4 left-4 flex gap-4 items-center">
+    <button id="showPseudo" onclick="modifyPseudo()" class="text-cyan-300 font-bold underline cursor-pointer"></button>
+    <button onclick="window.location.href='xp.html'" class="bg-green-500 hover:bg-green-600 px-3 py-1 rounded-full text-white font-semibold neon-button">
+      <span id="xpDisplay">XP: 0</span>
+    </button>
+  </div>
+
+  <!-- Header -->
+  <header class="text-center py-8">
+    <h1 class="text-4xl font-extrabold neon-title">🚀 Valentin GameZone</h1>
+    <p class="mt-2 text-lg text-cyan-200">Des jeux funs, gratuits, et stylés !</p>
+  </header>
+
+  <!-- Grille de jeux -->
+  <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <!-- Exemple de jeu -->
+    <div class="glass rounded-2xl p-4 text-center transition-transform hover:scale-105 duration-300">
+      <img src="https://via.placeholder.com/250x150.png?text=Jeu+1" class="rounded-lg mb-4 mx-auto">
+      <h3 class="text-xl font-bold text-cyan-300 mb-2">Jeu 1</h3>
+      <a href="jeux10.html" target="_blank" class="neon-button bg-cyan-500 text-white px-4 py-2 rounded-full hover:bg-cyan-600 transition">Jouer</a>
+    </div>
+
+    <div class="glass rounded-2xl p-4 text-center transition-transform hover:scale-105 duration-300">
+      <img src="https://via.placeholder.com/250x150.png?text=Jeu+1" class="rounded-lg mb-4 mx-auto">
+      <h3 class="text-xl font-bold text-cyan-300 mb-2">Jeu 2</h3>
+      <a href="jeux.html" target="_blank" class="neon-button bg-cyan-500 text-white px-4 py-2 rounded-full hover:bg-cyan-600 transition">Jouer</a>
+    </div>
+
+    <div class="glass rounded-2xl p-4 text-center transition-transform hover:scale-105 duration-300">
+      <img src="https://via.placeholder.com/250x150.png?text=Jeu+1" class="rounded-lg mb-4 mx-auto">
+      <h3 class="text-xl font-bold text-cyan-300 mb-2">Jeu 1</h3>
+      <a href="jeux2.html" target="_blank" class="neon-button bg-cyan-500 text-white px-4 py-2 rounded-full hover:bg-cyan-600 transition">Jouer</a>
+    </div>
+
+    <div class="glass rounded-2xl p-4 text-center transition-transform hover:scale-105 duration-300">
+      <img src="https://via.placeholder.com/250x150.png?text=Jeu+1" class="rounded-lg mb-4 mx-auto">
+      <h3 class="text-xl font-bold text-cyan-300 mb-2">Jeu 1</h3>
+      <a href="jeux10.html" target="_blank" class="neon-button bg-cyan-500 text-white px-4 py-2 rounded-full hover:bg-cyan-600 transition">Jouer</a>
+    </div>
+
+    <div class="glass rounded-2xl p-4 text-center transition-transform hover:scale-105 duration-300">
+      <img src="https://via.placeholder.com/250x150.png?text=Jeu+1" class="rounded-lg mb-4 mx-auto">
+      <h3 class="text-xl font-bold text-cyan-300 mb-2">Jeu 1</h3>
+      <a href="jeux10.html" target="_blank" class="neon-button bg-cyan-500 text-white px-4 py-2 rounded-full hover:bg-cyan-600 transition">Jouer</a>
+    </div>
+
+    <div class="glass rounded-2xl p-4 text-center transition-transform hover:scale-105 duration-300">
+      <img src="https://via.placeholder.com/250x150.png?text=Jeu+1" class="rounded-lg mb-4 mx-auto">
+      <h3 class="text-xl font-bold text-cyan-300 mb-2">Jeu 1</h3>
+      <a href="jeux10.html" target="_blank" class="neon-button bg-cyan-500 text-white px-4 py-2 rounded-full hover:bg-cyan-600 transition">Jouer</a>
+    </div>
+
+    <div class="glass rounded-2xl p-4 text-center transition-transform hover:scale-105 duration-300">
+      <img src="https://via.placeholder.com/250x150.png?text=Jeu+1" class="rounded-lg mb-4 mx-auto">
+      <h3 class="text-xl font-bold text-cyan-300 mb-2">Jeu 1</h3>
+      <a href="jeux10.html" target="_blank" class="neon-button bg-cyan-500 text-white px-4 py-2 rounded-full hover:bg-cyan-600 transition">Jouer</a>
+    </div>
+
+    <div class="glass rounded-2xl p-4 text-center transition-transform hover:scale-105 duration-300">
+      <img src="https://via.placeholder.com/250x150.png?text=Jeu+1" class="rounded-lg mb-4 mx-auto">
+      <h3 class="text-xl font-bold text-cyan-300 mb-2">Jeu 1</h3>
+      <a href="jeux10.html" target="_blank" class="neon-button bg-cyan-500 text-white px-4 py-2 rounded-full hover:bg-cyan-600 transition">Jouer</a>
+    </div>
+
+    <div class="glass rounded-2xl p-4 text-center transition-transform hover:scale-105 duration-300">
+      <img src="https://via.placeholder.com/250x150.png?text=Jeu+1" class="rounded-lg mb-4 mx-auto">
+      <h3 class="text-xl font-bold text-cyan-300 mb-2">Jeu 1</h3>
+      <a href="jeux10.html" target="_blank" class="neon-button bg-cyan-500 text-white px-4 py-2 rounded-full hover:bg-cyan-600 transition">Jouer</a>
+    </div>
+
+    <div class="glass rounded-2xl p-4 text-center transition-transform hover:scale-105 duration-300">
+      <img src="https://via.placeholder.com/250x150.png?text=Jeu+1" class="rounded-lg mb-4 mx-auto">
+      <h3 class="text-xl font-bold text-cyan-300 mb-2">Jeu 1</h3>
+      <a href="jeux10.html" target="_blank" class="neon-button bg-cyan-500 text-white px-4 py-2 rounded-full hover:bg-cyan-600 transition">Jouer</a>
+    </div>
+
+    <div class="glass rounded-2xl p-4 text-center transition-transform hover:scale-105 duration-300">
+      <img src="https://via.placeholder.com/250x150.png?text=Jeu+1" class="rounded-lg mb-4 mx-auto">
+      <h3 class="text-xl font-bold text-cyan-300 mb-2">Jeu 1</h3>
+      <a href="jeux10.html" target="_blank" class="neon-button bg-cyan-500 text-white px-4 py-2 rounded-full hover:bg-cyan-600 transition">Jouer</a>
+    </div>
+
+    <div class="glass rounded-2xl p-4 text-center transition-transform hover:scale-105 duration-300">
+      <img src="https://via.placeholder.com/250x150.png?text=Jeu+1" class="rounded-lg mb-4 mx-auto">
+      <h3 class="text-xl font-bold text-cyan-300 mb-2">Jeu 1</h3>
+      <a href="jeux10.html" target="_blank" class="neon-button bg-cyan-500 text-white px-4 py-2 rounded-full hover:bg-cyan-600 transition">Jouer</a>
+    </div>
+    <!-- ... (autres jeux identiques à ceux que tu avais) -->
+  </main>
+
+  <script>
+    // Chargement au démarrage
+    window.onload = function () {
+      const pseudo = localStorage.getItem("pseudo");
+      const xp = localStorage.getItem("xp") || 0;
+
+      if (!pseudo) {
+        document.getElementById("pseudoModal").classList.remove("hidden");
+      } else {
+        document.getElementById("showPseudo").textContent = pseudo;
+        document.getElementById("xpDisplay").textContent = "XP: " + xp;
+      }
+    };
+
+    // Sauvegarde le pseudo
+    function savePseudo() {
+      const input = document.getElementById("pseudoInput").value.trim();
+      if (input) {
+        localStorage.setItem("pseudo", input);
+        if (!localStorage.getItem("xp")) localStorage.setItem("xp", 0);
+        document.getElementById("pseudoModal").classList.add("hidden");
+        location.reload();
+      }
+    }
+
+    // Modifier le pseudo (revient à la fenêtre avec pseudo pré-rempli)
+    function modifyPseudo() {
+      const current = localStorage.getItem("pseudo");
+      document.getElementById("pseudoInput").value = current;
+      document.getElementById("pseudoModal").classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>

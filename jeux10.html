@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Couleur Ciblée</title>
   <style>
     body {
@@ -29,6 +29,7 @@
       border-radius: 10px;
       cursor: pointer;
       transition: transform 0.2s;
+      user-select: none;
     }
     .color-btn:hover {
       transform: scale(1.1);
@@ -45,27 +46,126 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      margin-top: 15px;
     }
     #message {
       font-size: 22px;
       margin-top: 20px;
       font-weight: bold;
+      min-height: 28px;
+    }
+    #topBar {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(255,255,255,0.9);
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      color: #3498db;
+      font-size: 18px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      font-weight: bold;
+      z-index: 100;
+      user-select: none;
+    }
+    .xp-anim {
+      animation: xpGain 1s ease-out;
+    }
+    @keyframes xpGain {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.5); color: limegreen; }
+      100% { transform: scale(1); }
+    }
+    /* Fenêtre modale */
+    #pseudoModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #pseudoBox {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+      text-align: center;
+      max-width: 90%;
+      box-sizing: border-box;
+    }
+    #pseudoBox input {
+      padding: 10px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+      width: 100%;
+      max-width: 250px;
+      box-sizing: border-box;
+    }
+    #pseudoBox button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #pseudoZone, #xpZone {
+      cursor: pointer;
+      user-select: none;
+    }
+    #accueilBtn {
+      margin-top: 20px;
+      padding: 10px 25px;
+      font-size: 18px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-block;
     }
   </style>
 </head>
 <body>
 
+<!-- Top Bar -->
+<div id="topBar">
+  <div id="pseudoZone">👤 Pseudo : <span id="pseudo">...</span></div>
+  <div id="xpZone">⭐ XP : <span id="xp">0</span></div>
+</div>
+
+<!-- Modal pour le pseudo -->
+<div id="pseudoModal" style="display:none;">
+  <div id="pseudoBox">
+    <h2>Entrez votre pseudo</h2>
+    <input type="text" id="pseudoInput" placeholder="Ton pseudo ici" autofocus />
+    <br />
+    <button id="validatePseudoBtn">Valider</button>
+  </div>
+</div>
+
 <h1>🎯 Tire sur la bonne couleur !</h1>
 
 <div id="game">
-  <div id="targetColor">Clique sur : <b>rouge</b></div>
-  <div id="buttons">
-    <!-- les boutons vont être générés dynamiquement -->
-  </div>
+  <div id="targetColor">Clique sur : <b>...</b></div>
+  <div id="buttons"></div>
   <div id="score">Score : 0</div>
   <div id="lives">❤️ Vies : 3</div>
   <div id="time">⏱️ Temps : 60</div>
   <button id="startBtn">Commencer</button>
+  <button id="accueilBtn" onclick="goAccueil()">Accueil</button>
   <div id="message"></div>
 </div>
 
@@ -80,82 +180,203 @@
     orange: "#e67e22"
   };
 
+  let pseudo = localStorage.getItem("pseudo") || null;
+  const pseudoModal = document.getElementById("pseudoModal");
+  const pseudoSpan = document.getElementById("pseudo");
+  const pseudoInput = document.getElementById("pseudoInput");
+  const validatePseudoBtn = document.getElementById("validatePseudoBtn");
+
+  const xpSpan = document.getElementById("xp");
+
   let score = 0;
   let lives = 3;
   let timeLeft = 60;
-  let target = "rouge";
-  let interval;
-  const targetDisplay = document.getElementById("targetColor");
-  const scoreDisplay = document.getElementById("score");
-  const livesDisplay = document.getElementById("lives");
-  const timeDisplay = document.getElementById("time");
-  const message = document.getElementById("message");
-  const startBtn = document.getElementById("startBtn");
+  let gameInterval = null;
+  let timerInterval = null;
+  let currentTarget = null;
+  const gameName = "Couleur Ciblée";
 
+  // Affiche le pseudo dans la topbar ou ouvre le modal si pas défini
+  function checkPseudo() {
+    if (!pseudo) {
+      pseudoModal.style.display = "flex";
+    } else {
+      pseudoSpan.textContent = pseudo;
+    }
+  }
+  checkPseudo();
+
+  validatePseudoBtn.onclick = () => {
+    const val = pseudoInput.value.trim();
+    if(val.length < 1) {
+      alert("Merci d'entrer un pseudo valide !");
+      return;
+    }
+    pseudo = val;
+    localStorage.setItem("pseudo", pseudo);
+    pseudoSpan.textContent = pseudo;
+    pseudoModal.style.display = "none";
+  };
+
+  // Met à jour l'affichage de l'XP total
+  function updateXPDisplay(xp) {
+    xpSpan.textContent = xp;
+    xpSpan.classList.add("xp-anim");
+    setTimeout(() => {
+      xpSpan.classList.remove("xp-anim");
+    }, 1000);
+  }
+
+  // Récupérer XP total et gameXP de localStorage
+  function getXP() {
+    return parseInt(localStorage.getItem("xp") || "0");
+  }
+
+  function getGameXP() {
+    return JSON.parse(localStorage.getItem("gameXP") || "{}");
+  }
+
+  // Ajouter XP et enregistrer dans l'historique
+  function addXP(amount, type = "normal") {
+    let totalXP = getXP() + amount;
+    localStorage.setItem("xp", totalXP);
+    updateXPDisplay(totalXP);
+
+    let gameXP = getGameXP();
+    if(!gameXP[gameName]) gameXP[gameName] = 0;
+    gameXP[gameName] += amount;
+    localStorage.setItem("gameXP", JSON.stringify(gameXP));
+
+    // Ajouter à l'historique
+    let history = JSON.parse(localStorage.getItem("xpHistory") || "[]");
+    history.push({
+      date: new Date().toISOString(),
+      game: type === "bonus" ? "Bonus " + gameName : gameName,
+      xp: amount
+    });
+    localStorage.setItem("xpHistory", JSON.stringify(history));
+  }
+
+  // Choisit une nouvelle couleur cible aléatoire différente de l'actuelle
+  function newTargetColor() {
+    let availableColors = colors.filter(c => c !== currentTarget);
+    currentTarget = availableColors[Math.floor(Math.random() * availableColors.length)];
+    document.getElementById("targetColor").innerHTML = `Clique sur : <b style="color:${colorHex[currentTarget]}">${currentTarget.toUpperCase()}</b>`;
+  }
+
+  // Crée les boutons de couleur
+  function createButtons() {
+    const btnsDiv = document.getElementById("buttons");
+    btnsDiv.innerHTML = "";
+    colors.forEach(c => {
+      const btn = document.createElement("div");
+      btn.className = "color-btn";
+      btn.style.backgroundColor = colorHex[c];
+      btn.title = c;
+      btn.dataset.color = c;
+      btn.addEventListener("click", () => {
+        if (!gameInterval) return;
+        if (c === currentTarget) {
+          score++;
+          addXP(10); // 10 XP par bonne réponse (historique normal)
+          showMessage("Bonne réponse ! +10 XP", "limegreen");
+        } else {
+          lives--;
+          showMessage("Mauvaise couleur ! -1 vie", "red");
+          if (lives <= 0) {
+            endGame();
+            return;
+          }
+          updateLives();
+        }
+        updateScore();
+        newTargetColor();
+      });
+      btnsDiv.appendChild(btn);
+    });
+  }
+
+  // Met à jour le score affiché
+  function updateScore() {
+    document.getElementById("score").textContent = "Score : " + score;
+  }
+  // Met à jour vies affichées
+  function updateLives() {
+    document.getElementById("lives").textContent = "❤️ Vies : " + lives;
+  }
+  // Met à jour temps affiché
+  function updateTime() {
+    document.getElementById("time").textContent = "⏱️ Temps : " + timeLeft;
+  }
+
+  // Affiche un message temporaire
+  function showMessage(text, color="black") {
+    const msg = document.getElementById("message");
+    msg.textContent = text;
+    msg.style.color = color;
+    setTimeout(() => {
+      if(msg.textContent === text) msg.textContent = "";
+    }, 1500);
+  }
+
+  // Démarre le jeu
   function startGame() {
+    if(gameInterval) return; // Déjà en cours
     score = 0;
     lives = 3;
     timeLeft = 60;
-    updateDisplays();
-    message.textContent = "";
-    startBtn.style.display = "none";
+    updateScore();
+    updateLives();
+    updateTime();
+    showMessage("");
+    newTargetColor();
     createButtons();
-    newTarget();
-    interval = setInterval(() => {
+    gameInterval = true; // juste un flag ici
+    // timer
+    timerInterval = setInterval(() => {
       timeLeft--;
-      updateDisplays();
-      if (timeLeft <= 0 || lives <= 0) {
+      updateTime();
+      if(timeLeft <= 0) {
         endGame();
       }
     }, 1000);
   }
 
+  // Termine le jeu
   function endGame() {
-    clearInterval(interval);
-    message.textContent = (lives <= 0) ? "Perdu 😵" : `Bravo 🎉 Score : ${score}`;
-    startBtn.textContent = "Rejouer";
-    startBtn.style.display = "inline-block";
-  }
-
-  function updateDisplays() {
-    scoreDisplay.textContent = "Score : " + score;
-    livesDisplay.textContent = "❤️ Vies : " + lives;
-    timeDisplay.textContent = "⏱️ Temps : " + timeLeft;
-  }
-
-  function createButtons() {
-    const container = document.getElementById("buttons");
-    container.innerHTML = "";
-    let shuffled = [...colors].sort(() => 0.5 - Math.random());
-    for (let c of shuffled) {
-      const btn = document.createElement("div");
-      btn.className = "color-btn";
-      btn.style.backgroundColor = colorHex[c];
-      btn.onclick = () => checkAnswer(c);
-      container.appendChild(btn);
+    clearInterval(timerInterval);
+    timerInterval = null;
+    gameInterval = null;
+    showMessage(`Fin du jeu ! Ton score: ${score}`, "blue");
+    // Donner de l'XP selon score
+    if(score > 0) {
+      const bonusXP = score * 5;
+      addXP(bonusXP, "bonus"); // Bonus XP dans catégorie spéciale
+      alert(`Bravo ${pseudo}, tu as gagné ${bonusXP} XP en bonus !`);
     }
   }
 
-  function newTarget() {
-    target = colors[Math.floor(Math.random() * colors.length)];
-    targetDisplay.innerHTML = `Clique sur : <b>${target}</b>`;
+  // Bouton accueil
+  function goAccueil() {
+    // par ex. aller à index.html ou autre
+    // Ici on peut juste afficher un message ou faire location.href
+    location.href = "index.html"; // à adapter selon ta page d’accueil
   }
 
-  function checkAnswer(clickedColor) {
-    if (clickedColor === target) {
-      score++;
-      createButtons();
-      newTarget();
-    } else {
-      lives--;
-    }
-    updateDisplays();
-    if (lives <= 0) {
-      endGame();
-    }
-  }
+  // Initialisation
+  checkPseudo();
+  updateXPDisplay(getXP());
+  createButtons();
 
-  startBtn.onclick = startGame;
+  // Event start button
+  document.getElementById("startBtn").addEventListener("click", startGame);
+
+  // Clic sur pseudo pour changer
+  document.getElementById("pseudoZone").addEventListener("click", () => {
+    pseudoModal.style.display = "flex";
+    pseudoInput.value = pseudo;
+    pseudoInput.focus();
+  });
 </script>
 
 </body>

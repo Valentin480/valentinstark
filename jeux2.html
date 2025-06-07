@@ -68,6 +68,28 @@
   <div id="score">Temps survécu : 0s</div>
   <div id="gameArea">
     <div id="player"></div>
+    <div id="topBar" style="
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(255,255,255,0.9);
+  padding: 10px 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  color: #3498db;
+  font-size: 18px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  font-weight: bold;
+  z-index: 100;
+  user-select: none;
+  cursor: default;
+">
+  <div id="pseudoZone" style="cursor:pointer;">👤 Pseudo : <span id="pseudo">...</span></div>
+  <div id="xpZone" style="cursor:default;">⭐ XP : <span id="xp">0</span></div>
+</div>
+
   </div>
 
   <script>

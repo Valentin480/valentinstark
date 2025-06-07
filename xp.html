@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mon XP</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    html, body {
+      margin: 0; 
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #e0f7fa, #fff);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    h1 {
+      font-size: 3rem;
+      margin: 10px 0 5px 0;
+      color: #2ecc71;
+    }
+    #messageNoGames {
+      font-size: 1.5rem;
+      color: #777;
+      margin: 40px 0;
+      font-weight: bold;
+      font-style: italic;
+    }
+    canvas {
+      max-width: 400px;
+      margin: 0;
+      display: block;
+    }
+    #xpTotal {
+      font-size: 5rem;
+      font-weight: bold;
+      color: #3498db;
+      margin: 5px 0 10px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+    #topGame {
+      font-size: 1.2rem;
+      color: #555;
+      margin-bottom: 20px;
+      text-align: center;
+      max-width: 600px;
+    }
+    #historyTitle {
+      margin-top: 10px;
+      font-size: 1.5rem;
+      color: #444;
+      user-select: none;
+    }
+    #historyList {
+      max-width: 600px;
+      width: 100%;
+      margin-bottom: 30px;
+      padding: 0;
+      list-style: none;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: #f9f9f9;
+      max-height: 400px;
+      overflow-y: auto;
+      font-size: 1rem;
+      color: #333;
+      scrollbar-width: thin;
+      scrollbar-color: #3498db #f9f9f9;
+    }
+    #historyList::-webkit-scrollbar {
+      width: 8px;
+    }
+    #historyList::-webkit-scrollbar-thumb {
+      background: #3498db;
+      border-radius: 8px;
+    }
+    #historyList::-webkit-scrollbar-track {
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+    #historyList li {
+      padding: 8px 12px;
+      border-bottom: 1px solid #ddd;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    #historyList li:last-child {
+      border-bottom: none;
+    }
+    #buttonsRow {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    button {
+      background-color: #3498db;
+      color: white;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin: 5px;
+      min-width: 150px;
+      user-select: none;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #refreshHistoryBtn {
+      background-color: #e67e22;
+      margin-bottom: 10px;
+    }
+    #refreshHistoryBtn:hover {
+      background-color: #ca7510;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🌟 Mon XP Total</h1>
+
+  <div id="messageNoGames" style="display:none;">🎮 Jouez pour voir vos statistiques !</div>
+  <canvas id="xpChart"></canvas>
+
+  <div id="xpTotal" title="Clique pour réinitialiser XP">0</div>
+  <div id="topGame">Chargement...</div>
+
+  <div id="historyTitle">🕹️ Historique des parties (dernières 1000)</div>
+  <button id="refreshHistoryBtn">🔄 Rafraîchir l'historique</button>
+  <ul id="historyList"></ul>
+
+  <div id="buttonsRow">
+    <button id="resetBtn">♻️ Réinitialiser les données</button>
+    <button id="backBtn">🎮 Retour au jeu</button>
+  </div>
+
+  <script>
+    function renderHistory() {
+      const historyList = document.getElementById("historyList");
+      let history = [];
+      try {
+        history = JSON.parse(localStorage.getItem("xpHistory") || "[]");
+      } catch(e) {
+        history = [];
+      }
+
+      historyList.innerHTML = "";
+
+      if (!Array.isArray(history) || history.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "Aucun historique disponible";
+        historyList.appendChild(li);
+        return;
+      }
+
+      // On affiche les derniers 1000 éléments, les plus récents en haut
+      history.slice(-1000).reverse().forEach(entry => {
+        if (entry && entry.date && entry.game && typeof entry.xp !== "undefined") {
+          const li = document.createElement("li");
+          const dateObj = new Date(entry.date);
+          if (isNaN(dateObj)) {
+            // Si date invalide, on affiche brut
+            li.textContent = `${entry.game} : +${entry.xp} XP — date invalide`;
+          } else {
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const year = dateObj.getFullYear();
+            const hours = String(dateObj.getHours()).padStart(2, '0');
+            const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+            const seconds = String(dateObj.getSeconds()).padStart(2, '0');
+            const dateStr = `${day}/${month}/${year} à ${hours}:${minutes}:${seconds}`;
+            li.textContent = `${entry.game} : +${entry.xp} XP — ${dateStr}`;
+          }
+          historyList.appendChild(li);
+        }
+      });
+
+      if (!historyList.hasChildNodes()) {
+        const li = document.createElement("li");
+        li.textContent = "Aucun historique disponible";
+        historyList.appendChild(li);
+      }
+    }
+
+    function renderXPAndChart() {
+      const xpTotal = parseInt(localStorage.getItem("xp") || "0", 10);
+      const gameXP = JSON.parse(localStorage.getItem("gameXP") || "{}");
+      document.getElementById("xpTotal").textContent = xpTotal;
+
+      let topGameName = "Aucun jeu joué";
+      let topGameXP = 0;
+      for (const [game, xp] of Object.entries(gameXP)) {
+        if (typeof xp === 'number' && xp > topGameXP) {
+          topGameXP = xp;
+          topGameName = game;
+        }
+      }
+      document.getElementById("topGame").textContent =
+        `🎮 Jeu qui t'a rapporté le plus d'XP : "${topGameName}" avec ${topGameXP} XP`;
+
+      const messageNoGames = document.getElementById("messageNoGames");
+      const xpChartCanvas = document.getElementById("xpChart");
+
+      if (Object.keys(gameXP).length === 0) {
+        xpChartCanvas.style.display = "none";
+        messageNoGames.style.display = "block";
+        if (window.xpChartInstance) {
+          window.xpChartInstance.destroy();
+          window.xpChartInstance = null;
+        }
+      } else {
+        messageNoGames.style.display = "none";
+        xpChartCanvas.style.display = "block";
+
+        const ctx = xpChartCanvas.getContext("2d");
+
+        if (window.xpChartInstance) {
+          window.xpChartInstance.destroy();
+        }
+
+        window.xpChartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(gameXP),
+            datasets: [{
+              label: 'XP par jeu',
+              data: Object.values(gameXP),
+              backgroundColor: [
+                '#3498db', '#e67e22', '#9b59b6', '#2ecc71', '#f1c40f', '#e74c3c',
+                '#1abc9c', '#9b59b6', '#34495e', '#f39c12'
+              ],
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' },
+              title: {
+                display: true,
+                text: 'Répartition des XP par jeu',
+                font: { size: 16 }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    function refreshAll() {
+      renderXPAndChart();
+      renderHistory();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      refreshAll();
+
+      document.getElementById("refreshHistoryBtn").onclick = renderHistory;
+
+      document.getElementById("resetBtn").onclick = () => {
+        if (confirm("Veux-tu vraiment réinitialiser toutes tes données d'XP ?")) {
+          localStorage.removeItem("xp");
+          localStorage.removeItem("gameXP");
+          localStorage.removeItem("xpHistory");
+          refreshAll();
+        }
+      };
+
+      document.getElementById("backBtn").onclick = () => {
+        window.location.href = "index.html";
+      };
+
+      document.getElementById("xpTotal").onclick = () => {
+        if (confirm("Veux-tu vraiment réinitialiser toutes tes données d'XP ?")) {
+          localStorage.removeItem("xp");
+          localStorage.removeItem("gameXP");
+          localStorage.removeItem("xpHistory");
+          refreshAll();
+        }
+      };
+
+      window.addEventListener("storage", (e) => {
+        if (["xpHistory", "xp", "gameXP"].includes(e.key)) {
+          refreshAll();
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
