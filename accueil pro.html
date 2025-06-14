@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>valentinstark.com - 2025</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .bg-scroll {
+      background-size: cover;
+      background-repeat: repeat-y;
+      animation: scrollBackground 30s linear infinite;
+    }
+
+    @keyframes scrollBackground {
+      from {
+        background-position-y: 0;
+      }
+      to {
+        background-position-y: -1000px;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 1.2s ease-out both;
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Particules animées */
+    #particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: cyan;
+      border-radius: 50%;
+      animation: floatUp linear infinite;
+      opacity: 0.5;
+    }
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100vh);
+        opacity: 0;
+      }
+      50% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(-10vh);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body class="h-screen overflow-hidden relative bg-gradient-to-br from-blue-900 to-gray-900 text-white">
+  <!-- Particules -->
+  <div id="particles"></div>
+
+  <!-- Background -->
+  <div id="background" class="absolute inset-0 bg-scroll z-0 opacity-20 blur-sm"></div>
+
+  <!-- Welcome Window -->
+  <div id="welcomeWindow" class="absolute z-10 inset-0 flex items-center justify-center fade-in">
+    <div class="bg-blue-950 bg-opacity-80 backdrop-blur-md p-10 rounded-3xl shadow-2xl text-center max-w-md border border-blue-700">
+      <h1 class="text-3xl font-bold mb-6">Bienvenue sur <span class="text-cyan-400">valentinstark.com</span> version 2025</h1>
+      <button id="startBtn" class="mt-4 px-6 py-2 bg-cyan-500 text-white font-semibold rounded-xl hover:bg-cyan-600 transition-all duration-300 shadow-lg">Commencer</button>
+    </div>
+  </div>
+
+  <!-- Nom/Prénom Formulaire -->
+  <div id="nameForm" class="hidden absolute inset-0 flex items-center justify-center z-10 fade-in">
+    <div class="bg-blue-950 p-8 rounded-3xl shadow-2xl text-center max-w-sm border border-cyan-700 backdrop-blur-md">
+      <h2 class="text-2xl font-semibold mb-4 text-cyan-300">Entre ton prénom et nom</h2>
+      <input id="prenom" type="text" placeholder="Prénom" class="mb-2 p-2 w-full bg-blue-900 text-white border border-cyan-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+      <input id="nom" type="text" placeholder="Nom" class="mb-4 p-2 w-full bg-blue-900 text-white border border-cyan-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+      <button id="saveName" class="px-4 py-2 bg-cyan-600 text-white rounded-xl hover:bg-cyan-700 transition shadow-md">Valider</button>
+    </div>
+  </div>
+
+  <!-- Message de retour -->
+  <div id="welcomeBack" class="hidden absolute inset-0 flex items-center justify-center z-10 fade-in">
+    <h1 class="text-cyan-300 text-3xl font-bold animate-pulse"></h1>
+  </div>
+
+  <script>
+    const background = document.getElementById('background');
+    const welcomeWindow = document.getElementById('welcomeWindow');
+    const startBtn = document.getElementById('startBtn');
+    const nameForm = document.getElementById('nameForm');
+    const saveName = document.getElementById('saveName');
+    const welcomeBack = document.getElementById('welcomeBack');
+
+    const imageUrls = [
+      'https://via.placeholder.com/600x400?text=Projet+1',
+      'https://via.placeholder.com/600x400?text=Projet+2',
+      'https://via.placeholder.com/600x400?text=Projet+3'
+    ];
+    background.style.backgroundImage = `url("${imageUrls.join(",")}")`;
+
+    startBtn.onclick = () => {
+      const prenom = localStorage.getItem("prenom");
+      const nom = localStorage.getItem("nom");
+      if (prenom && nom) {
+        welcomeWindow.classList.add('hidden');
+        welcomeBack.querySelector('h1').textContent = `Bienvenue ${prenom} ${nom}`;
+        welcomeBack.classList.remove('hidden');
+        setTimeout(() => {
+          welcomeBack.classList.add('hidden');
+          lancerSite();
+        }, 2000);
+      } else {
+        welcomeWindow.classList.add('hidden');
+        nameForm.classList.remove('hidden');
+      }
+    };
+
+    saveName.onclick = () => {
+      const prenom = document.getElementById('prenom').value.trim();
+      const nom = document.getElementById('nom').value.trim();
+      if (prenom && nom) {
+        localStorage.setItem("prenom", prenom);
+        localStorage.setItem("nom", nom);
+        nameForm.classList.add('hidden');
+        welcomeBack.querySelector('h1').textContent = `Bienvenue ${prenom} ${nom}`;
+        welcomeBack.classList.remove('hidden');
+        setTimeout(() => {
+          welcomeBack.classList.add('hidden');
+          lancerSite();
+        }, 2000);
+      }
+    };
+
+    function lancerSite() {
+      document.body.innerHTML = `
+        <div class="flex items-center justify-center h-screen text-white text-4xl font-bold animate-fadeIn">
+          Ton site est lancé, Valentin 🚀
+        </div>`;
+    }
+
+    // Génère des particules animées
+    const particleContainer = document.getElementById("particles");
+    for (let i = 0; i < 40; i++) {
+      const p = document.createElement("div");
+      p.className = "particle";
+      p.style.left = Math.random() * 100 + "vw";
+      p.style.animationDuration = 5 + Math.random() * 10 + "s";
+      p.style.animationDelay = Math.random() * 5 + "s";
+      particleContainer.appendChild(p);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profil</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-blue-900 text-white min-h-screen flex items-center justify-center p-4">
+
+  <div class="bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 w-full max-w-md space-y-6 border border-blue-600">
+
+    <!-- Profil -->
+    <div class="text-center">
+      <img id="profilePic" class="w-24 h-24 mx-auto rounded-full border-4 border-blue-500 shadow-lg" src="" alt="Photo de profil">
+      <h1 id="username" class="text-2xl font-bold mt-3">Nom du joueur</h1>
+    </div>
+
+    <!-- Données du joueur -->
+    <div class="grid grid-cols-2 gap-4 text-center">
+      <div class="bg-blue-700/40 rounded-xl p-4 shadow-inner">
+        <p class="text-sm text-blue-200">Service</p>
+        <p class="text-xl font-semibold">Max Score</p>
+      </div>
+      <div class="bg-green-700/40 rounded-xl p-4 shadow-inner">
+        <p class="text-sm text-green-200">Jeux</p>
+        <p id="xp" class="text-xl font-semibold">0 XP</p>
+      </div>
+    </div>
+
+    <!-- Bloc confidentialité -->
+    <div class="bg-gray-700/60 rounded-xl p-4 space-y-3 border border-gray-600">
+      <h2 class="text-lg font-semibold text-blue-300">Confidentialité</h2>
+      <p class="text-sm text-gray-300">Les données sont stockées localement sur votre appareil.</p>
+      <button onclick="clearData()" class="w-full bg-red-600 hover:bg-red-700 transition-all text-white font-bold py-2 px-4 rounded-lg shadow">
+        Supprimer toutes les données
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // Chargement des données au démarrage
+    document.addEventListener("DOMContentLoaded", () => {
+      const prenom = localStorage.getItem("prenom") || "Nom inconnu";
+      const nameForm = localStorage.getItem("nameForm") || "Nom inconnu";
+      const photoProfil = localStorage.getItem("photoProfil") || "https://via.placeholder.com/100";
+      const xp = localStorage.getItem("xp") || "0";
+
+      document.getElementById("username").textContent = prenom;
+      document.getElementById("nameForm").textContent = nameForm;
+      document.getElementById("photoProfil").src = photoProfil;
+      document.getElementById("xp").textContent = xp + " XP";
+    });
+    // Suppression et redirection
+    function clearData() {
+      if (confirm("Êtes-vous sûr de vouloir supprimer toutes les données ?")) {
+        localStorage.clear();
+        window.location.href = "index.html"; // Redirection vers la page d’accueil
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modifier ta photo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-bg: #0b132b;
+      --accent: #5bc0be;
+      --accent-hover: #3a9ca3;
+      --text-light: #ffffff;
+      --card-bg: #1c2541;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--main-bg);
+      color: var(--text-light);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    h2 {
+      margin-bottom: 25px;
+      font-weight: 600;
+      font-size: 24px;
+      color: var(--accent);
+    }
+
+    #preview {
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background-color: #2e3a5a;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 0 15px rgba(91, 192, 190, 0.4);
+      transition: background-image 0.4s ease;
+      animation: pulse 3s infinite;
+    }
+
+    input[type="file"] {
+      margin: 20px auto;
+      display: block;
+      color: white;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      background-color: var(--accent);
+      color: var(--text-light);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background-color: var(--accent-hover);
+      transform: scale(1.05);
+    }
+
+    #funBtn {
+      background-color: transparent;
+      border: 2px solid var(--accent);
+      margin-top: 15px;
+    }
+
+    #funBtn:hover {
+      background-color: var(--accent-hover);
+      color: white;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-size: 14px;
+      height: 24px;
+      transition: opacity 0.3s ease;
+    }
+
+    .error {
+      color: #f87171;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(91, 192, 190, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(91, 192, 190, 0.8);
+      }
+    }
+  </style>
+</head>
+<div id="consentBanner" style="
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: rgba(28, 37, 65, 0.95);
+  color: white;
+  padding: 16px;
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  z-index: 1000;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+  flex-wrap: wrap;
+  gap: 12px;
+">
+  <span>📸 Ce site utilise le stockage local pour conserver votre photo de profil. Acceptez-vous ?</span>
+  <div>
+    <button id="acceptConsent" style="margin-right: 10px; background: #5bc0be; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">Oui</button>
+    <button id="declineConsent" style="background: transparent; color: #f87171; border: 1px solid #f87171; padding: 8px 12px; border-radius: 6px; cursor: pointer;">Non</button>
+  </div>
+</div>
+
+<body>
+
+  <div class="container">
+    <h2>Change ta photo de profil</h2>
+
+    <div id="preview" aria-label="Aperçu de la photo"></div>
+
+    <input type="file" id="upload" accept="image/*" />
+
+    <button id="saveBtn" disabled>Sauvegarder</button>
+    <button id="funBtn" onclick="location.href='fun.html'">🎉 Aller vers la page fun</button>
+
+    <div id="message" role="alert" aria-live="polite"></div>
+  </div>
+
+  <script>
+    const preview = document.getElementById('preview');
+    const upload = document.getElementById('upload');
+    const saveBtn = document.getElementById('saveBtn');
+    const message = document.getElementById('message');
+
+    let base64Image = null;
+
+    // Image enregistrée
+    const savedImage = localStorage.getItem('photoProfil');
+    if (savedImage) {
+      preview.style.backgroundImage = `url(${savedImage})`;
+      saveBtn.disabled = false;
+      message.textContent = "Photo chargée 👍";
+    }
+
+    upload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      message.textContent = '';
+      message.classList.remove('error');
+
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        message.textContent = "❌ Fichier invalide.";
+        message.classList.add('error');
+        return;
+      }
+
+      if (file.size > 3 * 1024 * 1024) {
+        message.textContent = "❌ Image trop lourde (max 3Mo).";
+        message.classList.add('error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        base64Image = evt.target.result;
+        preview.style.backgroundImage = `url(${base64Image})`;
+        saveBtn.disabled = false;
+        message.textContent = "Image prête à être sauvegardée ✅";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    saveBtn.addEventListener('click', () => {
+      if (base64Image) {
+        localStorage.setItem('photoProfil', base64Image);
+        message.textContent = "✔️ Photo sauvegardée avec succès !";
+        message.classList.remove('error');
+      }
+    });
+    // Consentement
+const consentBanner = document.getElementById('consentBanner');
+const acceptConsent = document.getElementById('acceptConsent');
+const declineConsent = document.getElementById('declineConsent');
+
+let consentGiven = localStorage.getItem('consentementPhoto');
+
+// Afficher la bannière si pas encore donné
+if (consentGiven === null) {
+  consentBanner.style.display = 'flex';
+  saveBtn.disabled = true;
+} else if (consentGiven === 'true') {
+  saveBtn.disabled = !base64Image;
+} else {
+  saveBtn.disabled = true;
+}
+
+// Si l'utilisateur clique sur "oui"
+acceptConsent.addEventListener('click', () => {
+  localStorage.setItem('consentementPhoto', 'true');
+  consentGiven = 'true';
+  saveBtn.disabled = !base64Image;
+  consentBanner.style.display = 'none';
+});
+
+// Si l'utilisateur clique sur "non"
+declineConsent.addEventListener('click', () => {
+  localStorage.setItem('consentementPhoto', 'false');
+  consentGiven = 'false';
+  saveBtn.disabled = true;
+  consentBanner.style.display = 'none';
+});
+
+// Lors du clic sur "Sauvegarder"
+saveBtn.addEventListener('click', () => {
+  if (base64Image && consentGiven === 'true') {
+    localStorage.setItem('photoProfil', base64Image);
+    message.textContent = "✔️ Sauvegardée avec succès !";
+    message.classList.remove('error');
+  } else if (consentGiven !== 'true') {
+    message.textContent = "❌ Stockage refusé. Acceptez d'abord le stockage local.";
+    message.classList.add('error');
+  }
+});
+
+  </script>
+
+</body>
+</html>
