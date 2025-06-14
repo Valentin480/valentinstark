@@ -2,169 +2,300 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="description" content="Site de Valentin Stark ou Stark Valentin" />
-  <title>Valentin Stark - Bienvenue !</title>
-  <img src="images/logo.png" alt="Logo de mon site" width="150" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>valentinstark.com - 2025</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Roboto:wght@400;700&display=swap');
-
-    * {
-      box-sizing: border-box;
-      margin: 0; padding: 0;
+    .bg-scroll {
+      background-size: cover;
+      background-repeat: repeat-y;
+      animation: scrollBackground 30s linear infinite;
     }
 
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #ff6ec4, #7873f5);
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      text-align: center;
-      overflow-x: hidden;
+    @keyframes scrollBackground {
+      from {
+        background-position-y: 0;
+      }
+      to {
+        background-position-y: -1000px;
+      }
     }
 
-    h1 {
-      font-family: 'Fredoka One', cursive;
-      font-size: 3.5rem;
-      margin-bottom: 15px;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
-      animation: popIn 1s ease forwards;
+    .fade-in {
+      animation: fadeIn 1.2s ease-out both;
     }
 
-    p.lead {
-      font-size: 1.5rem;
-      margin-bottom: 40px;
-      font-weight: 700;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
-    .btn {
-      background: #ffd93b;
-      color: #333;
-      padding: 15px 35px;
-      border-radius: 50px;
-      font-weight: 700;
-      font-size: 1.2rem;
-      cursor: pointer;
-      text-decoration: none;
-      box-shadow: 0 6px #c1a800;
-      transition: all 0.3s ease;
-      display: inline-block;
-      user-select: none;
-    }
-
-    .btn:hover {
-      background: #fff;
-      box-shadow: 0 4px #c1a800;
-      transform: translateY(-3px);
-    }
-
-    .confetti {
-      position: fixed;
-      top: 0; left: 0;
+    /* Particules animées */
+    #particles {
+      position: absolute;
       width: 100%;
       height: 100%;
-      pointer-events: none;
-      z-index: 9999;
+      z-index: 1;
+      overflow: hidden;
     }
-
-    @keyframes popIn {
-      0% { transform: scale(0.3); opacity: 0;}
-      100% { transform: scale(1); opacity: 1;}
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: cyan;
+      border-radius: 50%;
+      animation: floatUp linear infinite;
+      opacity: 0.5;
+    }
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100vh);
+        opacity: 0;
+      }
+      50% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(-10vh);
+        opacity: 0;
+      }
     }
   </style>
 </head>
-<body>
+<body class="h-screen overflow-hidden relative bg-gradient-to-br from-blue-900 to-gray-900 text-white">
+  <!-- Particules -->
+  <div id="particles"></div>
 
-  <h1>Bienvenue sur le site de Valentin Stark ! 🎉</h1>
-  <p class="lead">Ici, c'est fun, coloré et plein de surprises !</p>
-  <a href="accueil.html" class="btn">C'est parti 🚀</a>
+  <!-- Background -->
+  <div id="background" class="absolute inset-0 bg-scroll z-0 opacity-20 blur-sm"></div>
 
-  <canvas class="confetti"></canvas>
+  <!-- Welcome Window -->
+  <div id="welcomeWindow" class="absolute z-10 inset-0 flex items-center justify-center fade-in hidden">
+    <div class="bg-blue-950 bg-opacity-80 backdrop-blur-md p-10 rounded-3xl shadow-2xl text-center max-w-md border border-blue-700">
+      <h1 class="text-3xl font-bold mb-6">
+        Bienvenue <span id="userFullName" class="text-cyan-400"></span> sur <span class="text-cyan-400">valentinstark.com</span> version 2025
+      </h1>
+      <button id="startBtn" class="mt-4 px-6 py-2 bg-cyan-500 text-white font-semibold rounded-xl hover:bg-cyan-600 transition-all duration-300 shadow-lg">Commencer</button>
+    </div>
+  </div>
+
+  <!-- Nom/Prénom Formulaire -->
+  <div id="nameForm" class="absolute inset-0 flex items-center justify-center z-10 fade-in hidden">
+    <div class="bg-blue-950 p-8 rounded-3xl shadow-2xl text-center max-w-sm border border-cyan-700 backdrop-blur-md">
+      <h2 class="text-2xl font-semibold mb-4 text-cyan-300">Entre ton prénom et nom</h2>
+      <input id="prenom" type="text" placeholder="Prénom" class="mb-2 p-2 w-full bg-blue-900 text-white border border-cyan-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+      <input id="nom" type="text" placeholder="Nom" class="mb-4 p-2 w-full bg-blue-900 text-white border border-cyan-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+      <button id="saveName" class="px-4 py-2 bg-cyan-600 text-white rounded-xl hover:bg-cyan-700 transition shadow-md">Valider</button>
+      <h6 class="text-2xl font-semibold mb-4 text-cyan-300">Cela permet le bon fonctionnement du site. Tkt ton nom et ton prénom sont stockés en local (localStorage) Aucune donnée personel ne quitte se site et stockés sans ton accord 👍</h6>
+    </div>
+  </div>
+
+  <!-- Message de retour -->
+  <div id="welcomeBack" class="hidden absolute inset-0 flex items-center justify-center z-10 fade-in">
+    <h1 class="text-cyan-300 text-3xl font-bold animate-pulse"></h1>
+  </div>
 
   <script>
-    
-    // Confetti simple JS
-    const canvas = document.querySelector('.confetti');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-    let confettiParticles = [];
+    const background = document.getElementById('background');
+    const welcomeWindow = document.getElementById('welcomeWindow');
+    const startBtn = document.getElementById('startBtn');
+    const nameForm = document.getElementById('nameForm');
+    const saveName = document.getElementById('saveName');
+    const welcomeBack = document.getElementById('welcomeBack');
 
-    function resize() {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
-    }
+    const imageUrls = [
+      'https://via.placeholder.com/600x400?text=Projet+1',
+      'https://via.placeholder.com/600x400?text=Projet+2',
+      'https://via.placeholder.com/600x400?text=Projet+3'
+    ];
+    background.style.backgroundImage = `url("${imageUrls.join(",")}")`;
 
-    window.addEventListener('resize', resize);
-    resize();
+    // Affichage conditionnel du formulaire ou de la fenêtre de bienvenue
+    document.addEventListener("DOMContentLoaded", function() {
+      const prenom = localStorage.getItem("prenom");
+      const nom = localStorage.getItem("nom");
+      const nameForm = document.getElementById('nameForm');
+      const welcomeWindow = document.getElementById('welcomeWindow');
+      const userFullName = document.getElementById('userFullName');
+      const welcomeBack = document.getElementById('welcomeBack');
+      const startBtn = document.getElementById('startBtn');
+      const saveName = document.getElementById('saveName');
 
-    function random(min, max) {
-      return Math.random() * (max - min) + min;
-    }
-
-    class Confetti {
-      constructor() {
-        this.x = random(0, width);
-        this.y = random(-height, 0);
-        this.size = random(5, 12);
-        this.speedY = random(2, 5);
-        this.speedX = random(-1.5, 1.5);
-        this.color = `hsl(${random(0, 360)}, 100%, 60%)`;
-        this.opacity = random(0.7, 1);
-        this.tilt = random(-15, 15);
-        this.tiltSpeed = random(0.1, 0.3);
-        this.tiltAngle = 0;
+      function showWelcome() {
+        userFullName.textContent = `${prenom} ${nom}`;
+        welcomeWindow.classList.remove('hidden');
+        nameForm.classList.add('hidden');
       }
-      update() {
-        this.y += this.speedY;
-        this.x += this.speedX;
-        this.tiltAngle += this.tiltSpeed;
-        this.tilt = Math.sin(this.tiltAngle) * 15;
-        if (this.y > height) {
-          this.y = random(-20, -10);
-          this.x = random(0, width);
+
+      function showNameForm() {
+        nameForm.classList.remove('hidden');
+        welcomeWindow.classList.add('hidden');
+      }
+
+      if (prenom && nom) {
+        showWelcome();
+      } else {
+        showNameForm();
+      }
+
+      saveName.onclick = () => {
+        const prenomInput = document.getElementById('prenom').value.trim();
+        const nomInput = document.getElementById('nom').value.trim();
+        if (prenomInput && nomInput) {
+          localStorage.setItem("prenom", prenomInput);
+          localStorage.setItem("nom", nomInput);
+          userFullName.textContent = `${prenomInput} ${nomInput}`;
+          nameForm.classList.add('hidden');
+          welcomeWindow.classList.remove('hidden');
         }
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.lineWidth = this.size / 2;
-        ctx.strokeStyle = this.color;
-        ctx.moveTo(this.x + this.tilt + this.size / 2, this.y);
-        ctx.lineTo(this.x + this.tilt, this.y + this.tilt + this.size / 2);
-        ctx.stroke();
-      }
-    }
+      };
 
-    for (let i = 0; i < 150; i++) {
-      confettiParticles.push(new Confetti());
-    }
+      startBtn.onclick = () => {
+        welcomeWindow.classList.add('hidden');
+        welcomeBack.querySelector('h1').textContent = `Bienvenue ${localStorage.getItem("prenom")} ${localStorage.getItem("nom")}`;
+        welcomeBack.classList.remove('hidden');
+        setTimeout(() => {
+          welcomeBack.classList.add('hidden');
+          lancerSite();
+        }, 2000);
+      };
+    });
 
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
-      confettiParticles.forEach(p => {
-        p.update();
-        p.draw();
-      });
-      requestAnimationFrame(animate);
-    }
-    animate();
-  </script>
-  <script>
-  // Vérifie si l'utilisateur est sur mobile
-     if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-    // Vérifie s’il n’est pas déjà sur la page d’avertissement
-     if (!window.location.href.includes("mobile-warning.html")) {
-      window.location.href = "/mobile-warning.html";
-    }
+function lancerSite() {
+  const body = document.body;
+
+  // Clone figé
+  const clone = body.cloneNode(true);
+  clone.id = "freezeClone";
+  clone.style.position = "fixed";
+  clone.style.top = "0";
+  clone.style.left = "0";
+  clone.style.width = "100vw";
+  clone.style.height = "100vh";
+  clone.style.overflow = "hidden";
+  clone.style.zIndex = "9999";
+  clone.style.pointerEvents = "none";
+  clone.style.userSelect = "none";
+
+  // Pause animations clone
+  clone.querySelectorAll("*").forEach(el => {
+    el.style.animationPlayState = "paused";
+    el.style.transition = "none";
+  });
+
+  document.body.appendChild(clone);
+  body.style.overflow = "hidden";
+
+  // Page noire en bas
+  const blackPage = document.createElement("div");
+  blackPage.id = "blackPage";
+  Object.assign(blackPage.style, {
+    position: "fixed",
+    top: "100vh",
+    left: "0",
+    width: "100vw",
+    height: "100vh",
+    backgroundColor: "#000",
+    zIndex: "9000",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    color: "#0ff",
+    fontSize: "14rem",
+    fontWeight: "900",
+    fontFamily: "'Orbitron', monospace",
+    textShadow: "0 0 20px #0ff, 0 0 30px #0ff",
+    userSelect: "none",
+    transition: "top 3s ease-in-out",
+  });
+  document.body.appendChild(blackPage);
+
+  // Google font Orbitron
+  if(!document.getElementById('orbitronFont')) {
+    const linkOrbitron = document.createElement('link');
+    linkOrbitron.id = 'orbitronFont';
+    linkOrbitron.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap';
+    linkOrbitron.rel = 'stylesheet';
+    document.head.appendChild(linkOrbitron);
   }
-    </script>
 
+  // Timer
+  const timerText = document.createElement("div");
+  timerText.textContent = "5";
+  blackPage.appendChild(timerText);
+
+  // Styles animation simples
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes subtlePulse {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.1); filter: brightness(1.3); }
+    }
+    @keyframes subtleShake {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(2px, 0); }
+      75% { transform: translate(-2px, 0); }
+    }
+  `;
+  document.head.appendChild(style);
+
+  function animateTimer() {
+    timerText.style.animation = "subtlePulse 1s infinite";
+  }
+  function shakeTimer() {
+    timerText.style.animation = "subtleShake 0.3s";
+    setTimeout(() => animateTimer(), 300);
+  }
+
+  setTimeout(() => {
+    clone.style.transition = "transform 3s ease-in-out";
+    clone.style.transform = "translateY(-100vh)";
+    blackPage.style.top = "0";
+    animateTimer();
+  }, 100);
+
+  let count = 5;
+  const interval = setInterval(() => {
+    if(count > 0) {
+      timerText.textContent = count;
+      shakeTimer();
+    } else if(count === 0) {
+      timerText.textContent = "GO!";
+      timerText.style.fontSize = "16rem";
+      timerText.style.color = "#0f0";
+      timerText.style.textShadow = "0 0 30px #0f0, 0 0 50px #0f0";
+      timerText.style.animation = "subtlePulse 1s infinite";
+    }
+    count--;
+    if(count < -1) {
+      clearInterval(interval);
+      setTimeout(() => {
+        clone.remove();
+        blackPage.remove();
+        window.location.href = "fun.html";
+      }, 1200);
+    }
+  }, 1000);
+}
+
+
+    // Génère des particules animées
+    const particleContainer = document.getElementById("particles");
+    for (let i = 0; i < 40; i++) {
+      const p = document.createElement("div");
+      p.className = "particle";
+      p.style.left = Math.random() * 100 + "vw";
+      p.style.animationDuration = 5 + Math.random() * 10 + "s";
+      p.style.animationDelay = Math.random() * 5 + "s";
+      particleContainer.appendChild(p);
+    }
+  </script>
 </body>
 </html>
+
