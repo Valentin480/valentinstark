@@ -1,41 +1,489 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="scroll-smooth" >
 <head>
-  <meta charset="UTF-8">
-  <title>Valentin Stark - Mes Projets</title>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Valentin Stark - accueil</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    /* Background animé - vague fluide avec canvas */
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      font-family: 'Orbitron', sans-serif;
+      background: #0f172a;
+      color: #00ffff;
+      overflow-x: hidden;
+    }
+    #bg-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      filter: brightness(0.7);
+    }
+    /* Navbar */
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(0, 20, 30, 0.75);
+      backdrop-filter: saturate(180%) blur(16px);
+      box-shadow: 0 0 25px #00ffffaa;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+    nav .logo {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffffaa;
+      user-select: none;
+    }
+    nav ul {
+      display: flex;
+      gap: 2rem;
+    }
+    nav ul li a {
+      position: relative;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #00ffffdd;
+      text-decoration: none;
+      padding-bottom: 0.2rem;
+      transition: color 0.3s ease;
+      user-select: none;
+    }
+    nav ul li a::after {
+      content: "";
+      position: absolute;
+      left: 0; bottom: 0;
+      height: 2px;
+      width: 0;
+      background: #00ffff;
+      transition: width 0.3s ease;
+      border-radius: 3px;
+    }
+    nav ul li a:hover {
+      color: #00ffff;
+    }
+    nav ul li a:hover::after {
+      width: 100%;
+    }
+    /* Burger menu */
+    .burger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .burger div {
+      width: 25px;
+      height: 3px;
+      background: #00ffffcc;
+      border-radius: 2px;
+      transition: all 0.4s ease;
+    }
+    .burger.active div:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+    }
+    .burger.active div:nth-child(2) {
+      opacity: 0;
+    }
+    .burger.active div:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+    }
+    /* Responsive nav menu */
+    @media (max-width: 768px) {
+      nav ul {
+        position: fixed;
+        top: 64px;
+        right: 0;
+        background: rgba(0, 20, 30, 0.95);
+        backdrop-filter: blur(20px);
+        height: calc(100vh - 64px);
+        width: 220px;
+        flex-direction: column;
+        padding: 2rem 1rem;
+        gap: 1.5rem;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        box-shadow: -5px 0 15px #00ffffbb;
+        border-left: 1px solid #00ffff55;
+      }
+      nav ul.active {
+        transform: translateX(0);
+      }
+      .burger {
+        display: flex;
+      }
+    }
+    /* Header glitch néon */
+    header {
+      text-align: center;
+      margin: 3rem 0 4rem;
+      user-select: none;
+    }
+    header h1 {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #00ffff;
+      position: relative;
+      letter-spacing: 0.2em;
+      text-shadow:
+        0 0 5px #00ffffaa,
+        0 0 20px #00ffffdd,
+        0 0 40px #00ffffee,
+        0 0 80px #00ffffff;
+      animation: glitch 2.5s infinite linear;
+    }
+    header p {
+      font-size: 1.3rem;
+      color: #00e6e6cc;
+      letter-spacing: 0.07em;
+      margin-top: 8px;
+      font-weight: 600;
+      text-shadow: 0 0 6px #00ffffbb;
+    }
+    @keyframes glitch {
+      0% {
+        text-shadow:
+          2px 0 #00ffff, 
+          -2px 0 #ff00ff,
+          0 0 10px #00ffff, 
+          0 0 20px #00ffff, 
+          0 0 40px #00ffff, 
+          0 0 80px #00ffff;
+      }
+      20% {
+        text-shadow:
+          -2px 0 #00ffff, 
+          2px 0 #ff00ff,
+          0 0 10px #00ffff, 
+          0 0 20px #00ffff, 
+          0 0 40px #00ffff, 
+          0 0 80px #00ffff;
+      }
+      40%, 60%, 80% {
+        text-shadow:
+          2px 0 #00ffff, 
+          -2px 0 #ff00ff,
+          0 0 15px #00ffff, 
+          0 0 25px #00ffff, 
+          0 0 45px #00ffff, 
+          0 0 90px #00ffff;
+      }
+      100% {
+        text-shadow:
+          -2px 0 #00ffff, 
+          2px 0 #ff00ff,
+          0 0 10px #00ffff, 
+          0 0 20px #00ffff, 
+          0 0 40px #00ffff, 
+          0 0 80px #00ffff;
+      }
+    }
+    /* Projet cards container */
+    main {
+      max-width: 1080px;
+      margin: 0 auto 6rem;
+      padding: 0 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+      gap: 2.8rem;
+      perspective: 1000px;
+    }
+    /* Projet card styles */
+    .card {
+      background: rgba(0, 255, 255, 0.05);
+      border-radius: 1.25rem;
+      box-shadow:
+        0 0 8px #00ffff55,
+        inset 0 0 20px #00ffff22;
+      overflow: hidden;
+      position: relative;
+      color: #00ffffee;
+      cursor: pointer;
+      transition: transform 0.5s ease, box-shadow 0.4s ease;
+      transform-style: preserve-3d;
+      border: 1px solid #00ffff66;
+    }
+    /* 3D hover effect */
+    .card:hover {
+      transform: translateY(-15px) rotateX(7deg) rotateY(15deg) scale(1.07);
+      box-shadow:
+        0 0 20px #00ffffcc,
+        0 0 40px #00ffffdd,
+        0 0 60px #00ffffee,
+        inset 0 0 35px #00ffffcc;
+      z-index: 20;
+    }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 1.25rem 1.25rem 0 0;
+      transition: filter 0.4s ease, transform 0.4s ease;
+      box-shadow:
+        inset 0 0 15px #00ffff55;
+      will-change: transform;
+    }
+    .card:hover img {
+      filter: brightness(1.2);
+      transform: scale(1.15) translateZ(20px);
+    }
+    /* Overlay text */
+    .overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 1.2rem 1.5rem;
+      background: linear-gradient(0deg, rgba(0,255,255,0.9) 10%, transparent 100%);
+      color: #002f3f;
+      font-weight: 900;
+      font-size: 1.3rem;
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 10px #00ffffaa;
+      border-radius: 0 0 1.25rem 1.25rem;
+      user-select: none;
+      transition: background 0.4s ease;
+    }
+    /* Micro-interactions */
+    .card:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 5px #00ffffbb inset;
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-b from-blue-100 to-purple-200 min-h-screen p-8">
-  <header class="text-center mb-12">
-    <h1 class="text-4xl font-bold text-gray-800">Bienvenue sur le site de Valentin Stark</h1>
-    <p class="text-lg text-gray-600 mt-2">Découvre tous mes projets numériques et fun !</p>
+<body>
+  <canvas id="bg-canvas"></canvas>
+
+
+  <header>
+    <h1>VALENTIN STARK</h1>
+    <p>Choisi une experience 🚀</p>
   </header>
+  <!-- En haut dans body -->
+<div id="header" style="position: fixed; top: 10px; left: 10px; display: flex; align-items: center; gap: 8px; background: #f0f0f0; padding: 6px 12px; border-radius: 20px; box-shadow: 0 0 5px rgba(0,0,0,0.1); cursor: pointer;" 
+     onclick="window.location.href='profil.html'">
+  <div id="circle" style="width: 40px; height: 40px; border-radius: 50%; background-color: #007BFF; background-size: cover; background-position: center;"></div>
+  <div id="name" style="font-weight: bold; font-size: 16px; color: #333;">Chargement...</div>
+</div>
 
-  <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+<script>
+  const nom = localStorage.getItem('nom') || 'Nom';
+  const prenom = localStorage.getItem('prenom') || 'Prénom';
+
+  document.getElementById('name').textContent = prenom + ' ' + nom;
+
+  const circle = document.getElementById('circle');
+  const imageProfil = localStorage.getItem('photoProfil');
+
+  if(imageProfil){
+    // Si une photo est stockée, on l'affiche en fond du cercle
+    circle.style.backgroundImage = `url(${imageProfil})`;
+    circle.style.backgroundColor = 'transparent'; // cacher la couleur si photo présente
+  }
+</script>
+
+
+
+  <main id="projets">
+    <article class="card" tabindex="0">
+      <img src="anglix.png" alt="Projet 1" />
+      <div class="overlay">anglix</div>
+    </article>
+    <article class="card" tabindex="0">
+      <img src="potato-501134_1280.jpg" alt="Projet 2" />
+      <div class="overlay">potato</div>
+    </article>
+    <article class="card" tabindex="0">
+      <img src="manette.png" alt="Projet 3" />
+      <div class="overlay">jeux</div>
+    </article>
+  </main>
+  <div class="text-center my-8">
+  <input id="secretCode" type="text" placeholder="Entre ton code secret" class="px-4 py-2 rounded-lg text-black">
+  <button onclick="checkCode()" class="ml-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg">Débloquer</button>
+</div>
+
+
+  <script>
+
+    // Burger menu toggle
+    const burger = document.getElementById('burger');
+    const navMenu = document.getElementById('nav-menu');
+    burger.addEventListener('click', () => {
+      burger.classList.toggle('active');
+      navMenu.classList.toggle('active');
+    });
+
+    // Canvas background animation (vague fluide simple)
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let waveOffset = 0;
+    function drawWave() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(0,255,255,0.1)';
+      ctx.beginPath();
+      const amplitude = 40;
+      const frequency = 0.02;
+      ctx.moveTo(0, height/2);
+      for (let x = 0; x <= width; x++) {
+        const y = height/2 + amplitude * Math.sin(frequency * (x + waveOffset));
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(width, height);
+      ctx.lineTo(0, height);
+      ctx.closePath();
+      ctx.fill();
+      waveOffset += 3;
+      requestAnimationFrame(drawWave);
+    }
+    drawWave();
     
-    <!-- Projet 1 -->
-    <a href="anglix.html" class="relative group rounded-2xl overflow-hidden shadow-lg hover:scale-105 transition transform duration-300 bg-white">
-      <img src="anglix.png" alt="Anglix" class="w-full h-48 object-cover">
-      <div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
-        <span class="text-white text-xl font-semibold">Anglix - Jeux de verbe irrégulier</span>
-      </div>
-    </a>
+  </script>
+  <div id="transition" class="hidden fixed top-0 left-0 w-full h-full bg-black flex items-center justify-center z-[9999] transition-opacity duration-700">
+  <h2 class="text-cyan-400 text-3xl md:text-5xl font-bold animate-pulse">Très bon choix, c’est parti !</h2>
+</div>
 
-    <!-- Projet 2 -->
-    <a href="patate/patate.html.html" class="relative group rounded-2xl overflow-hidden shadow-lg hover:scale-105 transition transform duration-300 bg-white">
-      <img src="potato-501134_1280.jpg" alt="Le QG" class="w-full h-48 object-cover">
-      <div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
-        <span class="text-white text-xl font-semibold">Les patates</span>
-      </div>
-    </a>
-    <!-- Tu peux ajouter autant de projets que tu veux ici -->
-      <a href="page-accueil-jeux.html" class="relative group rounded-2xl overflow-hidden shadow-lg hover:scale-105 transition transform duration-300 bg-white">
-      <img src="manette.png" alt="Le QG" class="w-full h-48 object-cover">
-      <div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
-        <span class="text-white text-xl font-semibold">Les jeux🎮</span>
-      </div>
-    </a>
-  </section>
+  <script>
+  const cards = document.querySelectorAll(".card");
+  const transitionDiv = document.getElementById("transition");
 
+  // Redirections vers des fichiers HTML locaux
+  const redirectLinks = {
+    "anglix": "irregular-verbs.html",
+    "potato": "patate/patate.html.html",
+    "jeux": ""
+    // ajoute ici d'autres redirections si besoin
+  };
+
+  cards.forEach(card => {
+    card.addEventListener("click", () => {
+      const label = card.querySelector(".overlay").textContent.trim().toLowerCase();
+      const targetUrl = redirectLinks[label];
+      if (!targetUrl) return;
+
+      transitionDiv.classList.remove("hidden");
+      transitionDiv.classList.add("flex");
+
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 1800); // Temps avant la redirection (en ms)
+    });
+  });
+</script>
+<div id="popup" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+  <div class="bg-white rounded-xl p-6 max-w-sm w-full text-center animate-bounce-in shadow-xl relative">
+    <button onclick="closePopup()" class="absolute top-2 right-3 text-black text-xl font-bold">✕</button>
+    <img id="characterImg" src="" alt="Personnage" class="mx-auto mb-4 rounded-lg shadow-md w-48 h-48 object-cover">
+    <h2 id="characterName" class="text-xl font-bold mb-2 text-black">Personnage débloqué !</h2>
+    <p id="characterDesc" class="text-gray-700">Félicitations ! Tu as débloqué un nouveau personnage.</p>
+    <p id="errorMsg" class="text-red-500 mt-2 hidden flex items-center justify-center">
+  ❌ On dirait que tu as déjà inséré ce code.
+</p>
+
+  </div>
+</div>
+<script>
+  const personnages = {
+    "raphael": {
+      nom: "Raphaël",
+      image: "raphael.png",
+      description: "Un héros venu du futur, prêt à sauver la galaxie ou pas. (on est pas dans stark ward raphaël)"
+    },
+    "robotik": {
+      nom: "Robotik",
+      image: "https://upload.wikimedia.org/wikipedia/en/9/99/Dr._Eggman.png",
+      description: "Un génie maléfique, mi-machine, mi-homme."
+    },
+    "mysteria": {
+      nom: "Mysteria",
+      image: "https://upload.wikimedia.org/wikipedia/en/thumb/5/5f/Raven_Teen_Titans.png/220px-Raven_Teen_Titans.png",
+      description: "Maîtresse des ombres, capable de disparaître sans laisser de trace."
+    }
+  };
+
+  // Charger les codes utilisés depuis le localStorage
+  let codesUtilisés = JSON.parse(localStorage.getItem("codesDebloques")) || [];
+
+  function checkCode() {
+    const code = document.getElementById("secretCode").value.trim().toLowerCase();
+    const perso = personnages[code];
+
+    const popup = document.getElementById("popup");
+    const errorMsg = document.getElementById("errorMsg");
+
+    if (!perso) {
+      alert("❌ Code invalide !");
+      return;
+    }
+
+    if (codesUtilisés.includes(code)) {
+      // Afficher message d'erreur
+      document.getElementById("characterImg").src = "";
+      document.getElementById("characterName").textContent = "";
+      document.getElementById("characterDesc").textContent = "";
+      errorMsg.classList.remove("hidden");
+      popup.classList.remove("hidden");
+      return;
+    }
+
+    // Masquer le message d'erreur
+    errorMsg.classList.add("hidden");
+
+    // Afficher le personnage
+    document.getElementById("characterImg").src = perso.image;
+    document.getElementById("characterName").textContent = perso.nom;
+    document.getElementById("characterDesc").textContent = perso.description;
+    popup.classList.remove("hidden");
+
+    // Ajouter le code au localStorage
+    codesUtilisés.push(code);
+    localStorage.setItem("codesDebloques", JSON.stringify(codesUtilisés));
+  }
+
+  function closePopup() {
+    document.getElementById("popup").classList.add("hidden");
+  }
+</script>
+<footer style="margin-top: 30px; font-size: 14px; color: #bbb; text-align: center;">
+  📢 Ce site utilise le stockage local uniquement pour vos données personnelles (photo, nom, thème, XP...).
+  <br />
+  🔐 Rien n’est envoyé à un serveur. Supprimez le cache pour effacer vos données.
+</footer>
+<!-- Bouton réglages en haut à droite -->
+<div style="position: fixed; top: 20px; right: 20px; z-index: 200;">
+  <button onclick="window.location.href='parametres.html'"
+          class="bg-cyan-600 hover:bg-cyan-700 transition p-3 rounded-full shadow-lg"
+          title="Paramètres">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none"
+         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+            d="M11.25 2.25l1.5 0m2.598 1.5l1.06 1.06m1.5 2.598l0 1.5m-1.5 2.598l-1.06 1.06m-2.598 1.5l-1.5 0m-2.598-1.5l-1.06-1.06m-1.5-2.598l0-1.5m1.5-2.598l1.06-1.06M12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
+    </svg>
+  </button>
+</div>
+
+
+</body>
 </html>
+
